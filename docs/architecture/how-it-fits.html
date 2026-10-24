@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Purrpose workflow</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27%3E%3Ccircle cx=%278%27 cy=%278%27 r=%276%27 fill=%27%23224f43%27/%3E%3C/svg%3E">
+<style>
+:root{--ink:#203c35;--muted:#62736d;--paper:#f6f5ef;--line:#dce4dc;--green:#224f43;--amber:#aa7d48;--amber-ink:#7a5717;--soft:#fff5dd;--wire:#9fb0a6;--dot:#d9dfd6}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-variant-numeric:tabular-nums}
+::selection{background:#ead9bb}
+:focus-visible{outline:3px solid #aa8041;outline-offset:3px}
+.shell{max-width:1400px;margin:auto;padding:0 28px}
+.demo-banner{background:#e7ede3;display:flex;justify-content:center;gap:18px;flex-wrap:wrap;padding:10px 20px;font-size:13px;text-align:center}
+.top{display:flex;align-items:center;justify-content:space-between;padding-top:25px;padding-bottom:12px;gap:18px;flex-wrap:wrap}
+.brand{font-size:31px;font-weight:750;letter-spacing:-1px}.brand-dot{color:#aa7d48}
+.top p{margin:0}.small{font-size:13px}.muted{color:var(--muted)}
+.intro{display:grid;grid-template-columns:1.4fr 1fr;gap:56px;padding:20px 0 26px}
+h1{font-size:clamp(28px,3.6vw,42px);line-height:1.13;letter-spacing:-.03em;margin:0 0 14px}
+h2{font-size:22px;line-height:1.25;letter-spacing:-.4px;margin:4px 0 10px}
+.intro p{margin:0;max-width:62ch}
+aside.how{align-self:center;border-left:2px solid #c3d0be;padding-left:26px;font-size:15px}
+aside.how ol{padding-left:20px;margin:6px 0 0}
+button{font:inherit;cursor:pointer;border:1px solid #c5d1c7;background:#fff;color:var(--ink);padding:9px 16px;border-radius:9px;min-height:42px}
+button:hover{border-color:var(--green)}
+button:disabled{opacity:.45;cursor:not-allowed}
+.primary{background:var(--green);color:#fff;border-color:var(--green)}
+.quiet{background:transparent}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.toolbar .sep{flex:1}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted);align-items:center}
+.legend i{display:inline-block;vertical-align:middle;margin-right:6px}
+.lg-main{width:26px;border-top:2px solid var(--wire)}
+.lg-sub{width:26px;border-top:2px dashed var(--wire)}
+.lg-dot{width:9px;height:9px;border-radius:50%;background:var(--amber)}
+.lg-dot.ok{background:#3f8a66}
+
+/* Canvas */
+.stage{display:block}
+.below{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:18px;align-items:start;margin:18px 0 34px}
+.viewport{position:relative;border:1px solid var(--line);border-radius:15px;background-color:#fbfbf7;background-image:radial-gradient(var(--dot) 1.1px,transparent 1.3px);background-size:22px 22px;overflow:auto}
+.canvas{position:relative;width:1400px;height:720px;transform-origin:0 0}
+svg.wires{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.wire{fill:none;stroke:var(--wire);stroke-width:2}
+.wire.sub{stroke-dasharray:6 6}
+.wire.on{stroke:var(--amber);stroke-width:2.5;animation:flow .9s linear infinite}
+.wire.main.on{stroke-dasharray:10 6}
+@keyframes flow{to{stroke-dashoffset:-32}}
+.arrow{fill:var(--wire)}
+.port-label,.branch-label{font-size:11px;fill:var(--muted)}
+
+.node{position:absolute;display:flex;flex-direction:column;align-items:center;text-align:center;background:none;border:0;padding:0;min-height:0;border-radius:0;color:var(--ink)}
+.node:hover{border:0}
+.node .box{display:grid;place-items:center;background:#fff;border:1.5px solid #b9c7bc;border-radius:16px;box-shadow:0 2px 8px rgba(32,60,53,.07);transition:border-color .2s,box-shadow .2s;position:relative}
+.node:hover .box{border-color:var(--green)}
+.node.sel .box{border-color:var(--green);box-shadow:0 0 0 3px rgba(34,79,67,.18)}
+.node.on .box{border-color:var(--amber);box-shadow:0 0 0 4px rgba(170,125,72,.22)}
+.node svg.ic{width:34px;height:34px;stroke:var(--green);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.node.on svg.ic{stroke:var(--amber-ink)}
+.node.tile .box{width:92px;height:92px}
+.node.trigger .box{border-radius:46px 16px 16px 46px}
+.node.circle .box{width:66px;height:66px;border-radius:50%}
+.node.circle svg.ic{width:28px;height:28px}
+.node.circle .name,.node.circle .sub{max-width:112px}
+.node.agent .box{width:270px;height:92px;grid-template-columns:auto 1fr;justify-items:start;gap:14px;padding:0 18px;text-align:left}
+.agent-title{font-weight:700;font-size:16px;line-height:1.2}
+.agent-sub{font-size:12px;color:var(--muted)}
+.node .name{margin-top:8px;font-weight:650;font-size:14px;line-height:1.25;max-width:150px}
+.node .sub{font-size:12px;color:var(--muted);max-width:150px;line-height:1.3}
+.node .state{position:absolute;top:-5px;right:-5px;width:12px;height:12px;border-radius:50%;background:var(--amber);border:2px solid #fff}
+.node .state.ok{background:#3f8a66}
+.handle{position:absolute;width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid #9fb0a6;top:50%;transform:translateY(-50%)}
+.handle.in{left:-7px}.handle.out{right:-7px}
+
+/* Side panel */
+.panel{background:#fff;border:1px solid var(--line);border-radius:15px;padding:22px}
+.panel h2{margin:0 0 2px}
+.panel .tech{font-size:13px;color:var(--muted);margin:0 0 12px}
+.panel p{margin:8px 0}
+.panel dl{margin:12px 0 0;display:grid;gap:10px}
+.panel dt{font-size:13px;font-weight:700;color:var(--muted)}
+.panel dd{margin:2px 0 0;font-size:15px}
+.panel ul{margin:2px 0 0;padding-left:18px}
+.pill{border-radius:20px;background:#e9efe7;padding:3px 10px;font-size:12px;display:inline-block}
+.pill.pending{color:var(--amber-ink);background:var(--soft)}
+.notice{padding:11px 13px;border-radius:10px;background:var(--soft);border:1px solid #eedab2;font-size:14px;margin-top:12px}
+.refs{font-size:13px;color:var(--muted);border-top:1px solid var(--line);margin-top:14px;padding-top:10px}
+code{font:13px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace;background:#eef2ec;color:var(--ink);padding:1px 5px;border-radius:5px}
+
+/* Run log */
+.log{background:#fff;border:1px solid var(--line);border-radius:15px;padding:18px 22px}
+.log-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.log ol{margin:10px 0 0;padding-left:24px}
+.log li{padding:4px 0;color:var(--muted)}
+.log li.done{color:var(--ink)}
+.log li.cur{color:var(--ink);font-weight:600}
+.log li.cur::marker{color:var(--amber)}
+.empty{color:var(--muted);margin:8px 0 0}
+footer{font-size:13px;color:var(--muted);padding-bottom:36px}
+footer p{max-width:110ch}
+
+@media (max-width:1000px){.below{grid-template-columns:1fr}.intro{grid-template-columns:1fr;gap:18px}}
+@media (max-width:560px){.shell{padding:0 16px}.toolbar .sep{display:none}}
+@media (prefers-reduced-motion:reduce){.wire.on{animation:none}*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="demo-banner"><strong>Explainer</strong><span>Shows the plan in <code>first draft/guidance/</code>. As of 24 Oct 2026 none of this is built. Example values are synthetic.</span></div>
+<header class="shell top"><div><span class="brand">purrpose<span class="brand-dot">.</span></span><p class="small muted">How the pieces connect</p></div></header>
+<main class="shell">
+  <section class="intro">
+    <div>
+      <h1>The Purrpose workflow, node by node.</h1>
+      <p>A request comes in on the left. Our orchestrator calls its model, memory and tools through the dashed wires underneath, then the code checks the results and decides which answer to give. Select any node to see what it is, or run an example to watch a request move through the system.</p>
+    </div>
+    <aside class="how">
+      <strong>Try it</strong>
+      <ol>
+        <li>Select a node to read about it.</li>
+        <li>Run “Donor asks”: the case stays pending.</li>
+        <li>Run “Rescue updates”: memory picks up the open question and the case qualifies.</li>
+      </ol>
+    </aside>
+  </section>
+
+  <div class="toolbar">
+    <button class="primary" id="run-a">Run: Donor asks</button>
+    <button id="run-b">Run: Rescue updates</button>
+    <button class="quiet" id="step" disabled>Next step</button>
+    <button class="quiet" id="reset">Reset</button>
+    <span class="sep"></span>
+    <div class="legend"><span><i class="lg-main"></i>Main flow</span><span><i class="lg-sub"></i>Called by the orchestrator</span><span><i class="lg-dot"></i>Not built</span><span><i class="lg-dot ok"></i>Running</span></div>
+  </div>
+
+  <div class="stage">
+    <div class="viewport" id="viewport">
+      <div class="canvas" id="canvas">
+        <svg class="wires" id="wires" viewBox="0 0 1400 720" aria-hidden="true"></svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="below">
+  <aside class="panel" id="panel" aria-live="polite"></aside>
+  <section class="log" aria-live="polite">
+    <div class="log-head"><h2 id="log-title">Run log</h2><span class="small muted">Simulated. No service is called.</span></div>
+    <div id="log-body"><p class="empty">Run an example to see each step here.</p></div>
+  </section>
+  </div>
+
+  <footer>
+    <p>Not part of the running product: Claude Code, Cursor and Codex help write the code, and Docker only hosts Zetaris on a laptop. Sources: <code>FULL_GUIDANCE.md</code> §16 (orchestrator), §17 (models), §19 (adapters), and the hackathon Participant Setup Guide. To edit this diagram, change <code>NODES</code>, <code>WIRES</code> and <code>RUNS</code> at the bottom of this file.</p>
+  </footer>
+</main>
+
+<script>
+'use strict';
+// ---- Edit content here. Positions are in canvas pixels (1400 x 720). ----
+const ICONS = {
+  bolt:'<path d="M13 3 5 13h6l-1 8 8-10h-6l1-8z"/>',
+  update:'<path d="M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3"/><path d="M18 3v4h-4M6 21v-4h4"/>',
+  agent:'<rect x="4" y="7" width="16" height="12" rx="3"/><path d="M12 3v4M9 12h.01M15 12h.01M9 16h6"/>',
+  check:'<path d="M5 4h14v16H5z"/><path d="m8 9 2 2 4-4M8 15h8"/>',
+  split:'<path d="M12 21V11M12 11 6 5M12 11l6-6M6 5h4M6 5v4M18 5h-4M18 5v4"/>',
+  ok:'<rect x="3" y="4" width="18" height="14" rx="2"/><path d="m8 11 3 3 5-6M8 21h8"/>',
+  pending:'<rect x="3" y="4" width="18" height="14" rx="2"/><path d="M12 8v4l2 2M8 21h8"/>',
+  link:'<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',
+  list:'<path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/>',
+  socket:'<path d="M7 3v5M17 3v5M5 8h14v4a7 7 0 0 1-14 0V8zM12 19v2"/>',
+  chip:'<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/>',
+  memory:'<path d="M5 4h11l3 3v13H5z"/><path d="M8 9h8M8 13h8M8 17h5"/>',
+  table:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M9 4v16"/>',
+  doc:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/>',
+  coin:'<circle cx="12" cy="12" r="8"/><path d="M14.5 9.5c-.5-1-1.5-1.5-2.5-1.5-1.4 0-2.5.8-2.5 2s1.1 1.6 2.5 2 2.5.8 2.5 2-1.1 2-2.5 2c-1 0-2-.5-2.5-1.5M12 6.5v1.5M12 16v1.5"/>'
+};
+
+const NODES = [
+  {id:'t1', type:'tile trigger', x:40, y:90, icon:'bolt', name:'Donor asks', sub:'"Can I help this cat?"', state:'todo',
+   tech:'Trigger · our app', what:'A supporter asks about one case, or asks to find one. The app asks once which city they prefer and never asks for a name or an amount.', job:['Starts a review of the case','Records which region and city the person asked about'], refs:'R04 · FULL_GUIDANCE §5'},
+  {id:'t2', type:'tile trigger', x:40, y:300, icon:'update', name:'Rescue updates', sub:'public page changed', state:'todo',
+   tech:'Trigger · our app', what:'A rescue changes its public case page, for example to say whether a grant is included in the amount raised. The notification alone is not evidence: the page has to be read and checked.', job:['Starts a re-review of only the checks the change affects','Starts from what memory already holds'], refs:'R05, R10 · FULL_GUIDANCE §6, §12'},
+  {id:'agent', type:'agent', x:230, y:190, icon:'agent', name:'Purrpose orchestrator', sub:'our backend · plans the steps', state:'todo',
+   tech:'Our code (Python suggested)', what:'One orchestrator, the program we write. It decides which tool to call next and stays within the call budget. It hands every decision to plain code.', job:['Calls the model, memory and tools through the dashed wires','At most one model extraction call per review by default (R13)','Never lets a model change money or qualification (R12)'], refs:'R12, R13 · FULL_GUIDANCE §16'},
+  {id:'runtime', type:'circle', x:251, y:390, icon:'socket', name:'Meterless Runtime', sub:'via Nightshift', state:'todo',
+   tech:'Hackathon Power rule', what:'The switchboard. Our app sends model requests to one OpenAI-style address with a token, and Nightshift passes them on to the model it is set up to use.', job:['The only model address our app knows','Satisfies the rule “Meterless Nightshift as primary AI provider”'],
+   note:'Nightshift for Windows needs a dedicated GPU. On 23 Oct the Meterless team said in the HackOS Help Meterless channel: build the Runtime provider into the app and test with NVIDIA’s hosted API.', refs:'FULL_GUIDANCE §19 Nightshift'},
+  {id:'nemotron', type:'circle', x:251, y:560, icon:'chip', name:'NVIDIA Nemotron', sub:'hosted model', state:'todo',
+   tech:'The model that reads', what:'The AI model behind the Runtime. It reads the vet estimate and proposes facts, each with where on the page it found them.', job:['Proposes treatment, cost and date as candidates','The code then checks every proposed fact','The NVIDIA key goes in Nightshift, never in our app'], refs:'R12 · FULL_GUIDANCE §17'},
+  {id:'hmem', type:'circle', x:375, y:390, icon:'memory', name:'H-MEM', sub:'Meterless memory engine', state:'todo',
+   tech:'Hackathon Build rule', what:'Memory with citations. Every finding keeps its source, and nothing is overwritten. It is an engine we build from Meterless’s reference code and test suite, not a hosted service.', job:['Recalls what is already known and what is still open','Saves new findings after each review','Keeps history honest: an old answer uses only what was known then'], proof:'The conformance tests pass, and the demo shows a recall after an update.', refs:'R11 · FULL_GUIDANCE §14'},
+  {id:'zetaris', type:'circle', x:520, y:390, icon:'table', name:'Zetaris', sub:'one SQL query across sources', state:'ok',
+   tech:'Hackathon Data rule', what:'A query layer. It reads separate sources where they live and lets us join them in one SQL query, keeping which source each row came from.', job:['Answers: does the registry match the name and city on the case page?','Returns funding rows with their dates'], note:'Running locally (REST on port 18888). No Purrpose tables yet. Sources must be in S3, a database or a REST API, not local files.', refs:'R07 · FULL_GUIDANCE §19 Zetaris'},
+  {id:'src1', type:'circle', x:420, y:560, icon:'doc', name:'CRA charity list', sub:'registration status', state:'todo',
+   tech:'Source', what:'The Canada Revenue Agency’s list of registered charities: name, status, address. The bulk download is a yearly snapshot, and live status is a web search.', job:['Identity check (check 1 of 6)'], refs:'R09 · FULL_GUIDANCE §13'},
+  {id:'src2', type:'circle', x:540, y:560, icon:'doc', name:'Case page', sub:'the rescue’s own site', state:'todo',
+   tech:'Source', what:'The rescue’s public page for this cat: the request, the city where treatment happens, and the medical material.', job:['Medical check, and the city used for sorting'], refs:'R05, R07'},
+  {id:'src3', type:'circle', x:660, y:560, icon:'coin', name:'Funding disclosure', sub:'raised, grants, dates', state:'todo',
+   tech:'Source', what:'The dated statement of how much is needed and how much has been raised, including any grants.', job:['Funding checks (checks 3 and 4)'], refs:'R08 · FULL_GUIDANCE §9'},
+  {id:'checks', type:'tile', x:640, y:190, icon:'check', name:'Six checks', sub:'and funding maths, in code', state:'todo',
+   tech:'Our code', what:'Plain code with no model involved. It runs the six checks and calculates the remaining amount. Unknown stays unknown and is never counted as zero.', job:['Identity, medical, costs dated, positive remainder, donation link, risk','2,000 − 700 − 300 = 1,000 if the grant is separate; unknown if unclear'], refs:'R06, R08 · FULL_GUIDANCE §7, §9'},
+  {id:'gate', type:'tile', x:820, y:190, icon:'split', name:'All six pass?', sub:'qualified or pending', state:'todo',
+   tech:'Our code', what:'The fork in the road. Only a case that passes every check is shown as qualified. Anything else is pending, with the reason.', job:['Qualification applies to this case only, not to every request by the organization'], refs:'R06'},
+  {id:'qual', type:'tile', x:1030, y:50, icon:'ok', name:'Show qualified case', sub:'with every source', state:'todo',
+   tech:'Result page', what:'The supporter sees the case, its sources and the remaining amount, plus what has not been independently confirmed.', job:['Ordered by city, organization and case name, never by a trust score'], refs:'R04 · FULL_GUIDANCE §5.4'},
+  {id:'link', type:'tile', x:1230, y:50, icon:'link', name:'Rescue’s own donation link', sub:'Purrpose handles no money', state:'todo',
+   tech:'External link', what:'A checked link to the organization’s own donation channel. Purrpose never takes, sends or processes money.', job:['The link is checked to belong to the same organization (check 5)'], refs:'R15 · FULL_GUIDANCE §10'},
+  {id:'pend', type:'tile', x:1030, y:340, icon:'pending', name:'Show pending case', sub:'what is missing, and where', state:'todo',
+   tech:'Result page', what:'An honest pending result: the known facts, what is missing, and where it could come from. Missing information does not mean dishonesty.', job:['Never invents a remaining amount'], refs:'R06 · FULL_GUIDANCE §5.4'},
+  {id:'gaps', type:'tile', x:1230, y:340, icon:'list', name:'Gap list for the rescue', sub:'what to add and why', state:'todo',
+   tech:'Result page', what:'The rescue gets a practical list of what is satisfied, missing, expired or conflicting, and what to add to its public page.', job:['Public links only, no private uploads'], refs:'R05 · FULL_GUIDANCE §6'}
+];
+
+// [from, to, kind (main | sub), optional label]
+const WIRES = [
+  ['t1','agent','main'], ['t2','agent','main'],
+  ['agent','runtime','sub','Model'], ['runtime','nemotron','sub'],
+  ['agent','hmem','sub','Memory'], ['agent','zetaris','sub','Tools'],
+  ['zetaris','src1','sub'], ['zetaris','src2','sub'], ['zetaris','src3','sub'],
+  ['agent','checks','main'], ['checks','gate','main'],
+  ['gate','qual','main','pass'], ['gate','pend','main','not yet'],
+  ['qual','link','main'], ['pend','gaps','main']
+];
+
+const RUNS = {
+  a:{title:'Run: Donor asks', steps:[
+    {on:['t1'], wires:[], text:'A supporter asks about Maple, a synthetic Ottawa case: CAD 2,000 for treatment.'},
+    {on:['agent'], wires:['t1>agent'], text:'The orchestrator plans the review: what to look up, what is allowed, and the one model call.'},
+    {on:['hmem'], wires:['agent>hmem'], text:'H-MEM recall: nothing is known about this case yet.'},
+    {on:['zetaris','src1','src2','src3'], wires:['agent>zetaris','zetaris>src1','zetaris>src2','zetaris>src3'], text:'Zetaris joins the registry record, the case page and the funding disclosure: CAD 700 raised and a CAD 300 grant.'},
+    {on:['runtime','nemotron'], wires:['agent>runtime','runtime>nemotron'], text:'The vet estimate goes through the Meterless Runtime to Nemotron, which proposes “CAD 2,000, estimate item 1”.'},
+    {on:['checks'], wires:['agent>checks'], text:'The code checks the facts. The disclosure doesn’t say whether the grant is part of the CAD 700, so the remaining amount is unknown.'},
+    {on:['gate'], wires:['checks>gate'], text:'The funding check can’t pass, so the case is not qualified.'},
+    {on:['pend'], wires:['gate>pend'], text:'The supporter sees a pending case: what is known, what is missing, and the sources.'},
+    {on:['gaps','hmem'], wires:['pend>gaps','agent>hmem'], text:'The rescue is asked: “Is the CAD 300 grant included in the CAD 700?” The open question is saved in H-MEM.'}
+  ]},
+  b:{title:'Run: Rescue updates', steps:[
+    {on:['t2'], wires:[], text:'The rescue updates its page: the grant is separate from the CAD 700 raised.'},
+    {on:['agent'], wires:['t2>agent'], text:'The orchestrator starts a re-review, limited to the checks this change affects.'},
+    {on:['hmem'], wires:['agent>hmem'], text:'H-MEM recall: the earlier findings, plus the open question about the grant.'},
+    {on:['zetaris','src3'], wires:['agent>zetaris','zetaris>src3'], text:'Only the funding disclosure is read again. The identity and medical findings are reused while still valid.'},
+    {on:['checks'], wires:['agent>checks'], text:'The code calculates: 2,000 − 700 − 300 = CAD 1,000 remaining. No model call was needed.'},
+    {on:['gate'], wires:['checks>gate'], text:'All six checks pass on synthetic test data.'},
+    {on:['qual','hmem'], wires:['gate>qual','agent>hmem'], text:'The case is shown as qualified, with its sources. The earlier pending result stays in history.'},
+    {on:['link'], wires:['qual>link'], text:'The supporter gets the rescue’s own donation link. Purrpose never handles money.'}
+  ]}
+};
+
+// ---- Rendering. ----
+const $ = id => document.getElementById(id);
+const byId = Object.fromEntries(NODES.map(n=>[n.id,n]));
+const size = n => n.type.includes('agent') ? {w:270,h:92} : n.type.includes('circle') ? {w:66,h:66} : {w:92,h:92};
+let selected = 'agent', run = null, stepIx = -1;
+
+function ports(n){
+  const s=size(n), cx=n.x+s.w/2, cy=n.y+s.h/2;
+  return {in:[n.x,cy], out:[n.x+s.w,cy], top:[cx,n.y], bottom:[cx,n.y+s.h],
+    sub:{runtime:[n.x+s.w*0.2,n.y+s.h], hmem:[n.x+s.w*0.5,n.y+s.h], zetaris:[n.x+s.w*0.8,n.y+s.h]}};
+}
+
+function drawWires(){
+  let h='<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrow" d="M0 0 10 5 0 10z"/></marker></defs>';
+  WIRES.forEach(([f,t,kind,label])=>{
+    const pa=ports(byId[f]), pb=ports(byId[t]);
+    let d, lx, ly;
+    if(kind==='main'){
+      let [x1,y1]=pa.out; const [x2,y2]=pb.in;
+      if(f==='gate') y1 += (t==='qual' ? -14 : 14);
+      const c=Math.max(40,(x2-x1)/2);
+      d=`M${x1} ${y1} C${x1+c} ${y1} ${x2-c} ${y2} ${x2-2} ${y2}`;
+      if(label){lx=x1+22; ly=y1+(t==='qual'?-10:22);}
+    } else {
+      const [x1,y1]= f==='agent' ? pa.sub[t] : [pa.bottom[0], pa.bottom[1]+60];
+      const [x2,y2]=pb.top; const c=Math.max(24,(y2-y1)/2);
+      d=`M${x1} ${y1} C${x1} ${y1+c} ${x2} ${y2-c} ${x2} ${y2-2}`;
+      if(label){lx=x1+8; ly=y1+18;}
+    }
+    h+=`<path class="wire ${kind}" data-w="${f}>${t}" d="${d}" marker-end="url(#arr)"/>`;
+    if(label) h+=`<text class="${kind==='main'?'branch-label':'port-label'}" x="${lx}" y="${ly}">${label}</text>`;
+  });
+  $('wires').innerHTML=h;
+}
+
+function drawNodes(){
+  const c=$('canvas');
+  NODES.forEach(n=>{
+    const el=document.createElement('button');
+    el.className='node '+n.type; el.dataset.id=n.id;
+    el.style.left=n.x+'px'; el.style.top=n.y+'px';
+    el.setAttribute('aria-label',`${n.name}: ${n.sub}`);
+    const ic=`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n.icon]}</svg>`;
+    const dot=`<span class="state ${n.state==='ok'?'ok':''}" title="${n.state==='ok'?'Running':'Not built'}"></span>`;
+    if(n.type==='agent'){
+      el.innerHTML=`<span class="box">${ic}<span><span class="agent-title">${n.name}</span><br><span class="agent-sub">${n.sub}</span></span>${dot}<span class="handle in"></span><span class="handle out"></span></span>`;
+    } else {
+      const handles = n.type.includes('circle') ? '' : `${n.type.includes('trigger')?'':'<span class="handle in"></span>'}${['link','gaps'].includes(n.id)?'':'<span class="handle out"></span>'}`;
+      el.innerHTML=`<span class="box">${ic}${dot}${handles}</span><span class="name">${n.name}</span><span class="sub">${n.sub}</span>`;
+    }
+    el.addEventListener('click',()=>{selected=n.id; renderPanel(); paint();});
+    c.appendChild(el);
+  });
+}
+
+function renderPanel(){
+  const n=byId[selected];
+  $('panel').innerHTML=`<h2>${n.name}</h2><p class="tech">${n.tech}</p><p>${n.what}</p>
+    <dl><div><dt>Its job here</dt><dd><ul>${n.job.map(j=>`<li>${j}</li>`).join('')}</ul></dd></div>
+    ${n.proof?`<div><dt>What proves it works</dt><dd>${n.proof}</dd></div>`:''}
+    <div><dt>Today</dt><dd><span class="pill ${n.state==='ok'?'':'pending'}">${n.state==='ok'?'Running locally':'Not built yet'}</span></dd></div></dl>
+    ${n.note?`<div class="notice">${n.note}</div>`:''}
+    <div class="refs">Read next: ${n.refs}</div>`;
+}
+
+function paint(){
+  const s = run && stepIx>=0 ? RUNS[run].steps[stepIx] : null;
+  document.querySelectorAll('.node').forEach(el=>{
+    el.classList.toggle('on', !!s && s.on.includes(el.dataset.id));
+    el.classList.toggle('sel', el.dataset.id===selected);
+  });
+  document.querySelectorAll('.wire').forEach(w=>w.classList.toggle('on', !!s && s.wires.includes(w.dataset.w)));
+}
+
+function renderLog(){
+  if(!run){$('log-title').textContent='Run log';$('log-body').innerHTML='<p class="empty">Run an example to see each step here.</p>';$('step').disabled=true;$('step').textContent='Next step';return}
+  const r=RUNS[run];
+  $('log-title').textContent=r.title;
+  $('log-body').innerHTML='<ol>'+r.steps.slice(0,stepIx+1).map((s,i)=>`<li class="${i===stepIx?'cur':'done'}">${s.text}</li>`).join('')+'</ol>';
+  const done = stepIx>=r.steps.length-1;
+  $('step').disabled = done; $('step').textContent = done ? 'Run finished' : 'Next step';
+}
+
+function show(){ selected=RUNS[run].steps[stepIx].on[0]; renderPanel(); paint(); renderLog(); }
+function start(k){ run=k; stepIx=0; show(); }
+function next(){ if(run && stepIx<RUNS[run].steps.length-1){ stepIx++; show(); } }
+
+function fit(){
+  const vp=$('viewport'), c=$('canvas');
+  const k=Math.max(0.62, Math.min(1, (vp.clientWidth-2)/1400));
+  c.style.transform=`scale(${k})`;
+  c.style.marginBottom=`${720*k-720}px`; c.style.marginRight=`${1400*k-1400}px`;
+}
+
+$('run-a').onclick=()=>start('a');
+$('run-b').onclick=()=>start('b');
+$('step').onclick=next;
+$('reset').onclick=()=>{ run=null; stepIx=-1; selected='agent'; renderPanel(); paint(); renderLog(); };
+document.addEventListener('keydown',e=>{ if(e.key==='ArrowRight') next(); });
+window.addEventListener('resize',fit);
+drawWires(); drawNodes(); renderPanel(); paint(); fit();
+</script>
+</body>
+</html>
