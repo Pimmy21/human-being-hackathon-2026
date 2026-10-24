@@ -1,7 +1,5 @@
 # Tool Responsibilities
 
-For exact setup, calling contracts, failure states and owners, use [the integration handbook](handbook/04-integrations.md). For the current implementation status, use [the status record](handbook/07-status.md).
-
 These are proposed roles for either idea, not claims that the final application is integrated.
 
 | Tool | Role | Evidence we should show |

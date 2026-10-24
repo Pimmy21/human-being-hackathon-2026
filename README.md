@@ -2,7 +2,7 @@
 
 Shared workspace for our Open Agent Hackathon 2026 ideas, mentor feedback and eventual project submission.
 
-**Purrpose is the active direction for the team handoff.** Start with [START HERE](START_HERE.md) for the detailed execution guide. Final track and submission decisions remain open. The two short overviews are:
+**We have not selected the final idea yet.** Start with the two short overviews:
 
 - [Purrpose](ideas/purrpose.md): help donors examine animal rescue requests and their supporting evidence.
 - [Antenna Design Comparison](ideas/antenna-design-comparison.md): help RF engineers and students compare antenna designs from research papers.
@@ -23,21 +23,8 @@ Shared workspace for our Open Agent Hackathon 2026 ideas, mentor feedback and ev
 
 This repository is the shared home for project files. Secrets stay in each teammate's local environment. Do not upload API keys, passwords, private donor information, or papers and images without permission to share them.
 
-## Detailed team guide
-
-- [Product purpose and boundaries](docs/handbook/01-product.md)
-- [Backend architecture and data contract](docs/handbook/02-engineering.md)
-- [Frontend and design](docs/handbook/03-interface.md)
-- [Tool connections and calling methods](docs/handbook/04-integrations.md)
-- [Team execution and definition of done](docs/handbook/05-delivery.md)
-- [Troubleshooting and escalation](docs/handbook/06-troubleshooting.md)
-- [Actual status, setup and migration](docs/handbook/07-status.md)
-- [Copyable task prompts for assistants](docs/handbook/08-task-prompts.md)
-
-Coding assistants should read [AGENTS.md](AGENTS.md). The guide tells people and tools how to work; it does not start unattended agents or provide credentials.
-
 ## Project status
 
-The repository contains documentation and proposed implementation contracts, not yet a complete runnable product. Earlier local experiments with H-MEM, Zetaris and NVIDIA are not included here and do not establish that the new case workflow has been built. See the dated status chapter for precise evidence and limits.
+The overview documents describe proposals, not completed products. Earlier local experiments with H-MEM, Zetaris and NVIDIA are not included here and do not establish that either proposed workflow has been built.
 
 See [Working together](docs/working-together.md) and [Tool responsibilities](docs/tool-responsibilities.md).
