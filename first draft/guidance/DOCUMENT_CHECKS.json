@@ -1,0 +1,15 @@
+{
+  "scope": "Static document consistency checks only, not application/integration tests",
+  "markdown_documents": 8,
+  "configuration_json": "valid",
+  "json_examples_checked": 5,
+  "acceptance_case_count": 106,
+  "word_count": 15516,
+  "broken_links_or_format_errors": [],
+  "confirmed_policy_defaults": "consistent",
+  "human_agent_rule_mapping": "17 shared rule IDs present with valid heading links",
+  "portable_context_scan": "no named original owner, implicit teammates or removed popularity wording",
+  "publication_status": "first draft shared for review with owner approval",
+  "application_tests_run": false,
+  "live_provider_calls_made_for_this_revision": false
+}

@@ -1,0 +1,163 @@
+{
+  "document_status": "first_draft_shared_for_review_not_production_approved",
+  "policy_version": "purrpose-mvp1-draft-v2.1",
+  "configuration_kind": "Ontario_reference_profile_not_an_implicit_deployment_target",
+  "deployment_setup": {
+    "target_country": null,
+    "target_province_or_state": null,
+    "workspace": null,
+    "product_policy_owner": null,
+    "business_review_operator": null,
+    "account_owners": null,
+    "delivery_objective": null,
+    "use_reference_profile": null,
+    "unconfigured_behavior": "ask_for_missing_values_before_claiming_deployment_setup_complete"
+  },
+  "effective_at": null,
+  "profile_status": "unvalidated",
+  "region": {
+    "country": "CA",
+    "province": "ON",
+    "formal_demo_region": "CA-ON",
+    "case_location_basis": "actual_rescue_or_treatment_city",
+    "allow_unvalidated_region_qualification": false
+  },
+  "scope": {
+    "version": "mvp1",
+    "eligible_recipient_kind": "officially_checkable_registered_organization",
+    "animal": "cat",
+    "purpose": "specific_medical_case",
+    "individual_recipients": false,
+    "mvp2_required_expansion": [
+      "cat_food",
+      "routine_medical_care",
+      "premises",
+      "other_reviewed_operating_needs"
+    ],
+    "future_identity_expansion": "rescue_teams_with_other_checkable_identity_evidence_requires_separate_policy"
+  },
+  "inputs": {
+    "curated_collection": true,
+    "public_update_links": true,
+    "private_document_uploads": false,
+    "notification_is_evidence": false,
+    "notification_grants_representative_authority": false
+  },
+  "freshness": {
+    "funding_max_age_days": 7,
+    "medical_stated_validity_takes_priority": true,
+    "medical_default_max_age_days": 30,
+    "review_refresh_hours_without_update_signal": 24,
+    "screened_relevant_update_bypasses_cache": true,
+    "background_monitoring": false,
+    "date_boundary_semantics": {
+      "timestamp_age_limit": "inclusive",
+      "date_only_age": "region_local_calendar_dates",
+      "date_only_expiration": "through_local_date_end",
+      "future_source_date": "needs_clarification"
+    },
+    "date_boundary_status": "confirmed"
+  },
+  "required_gates": [
+    "identity_geography",
+    "medical_need",
+    "funding_evidence",
+    "positive_disclosed_remainder",
+    "donation_channel",
+    "organization_risk"
+  ],
+  "funding": {
+    "amount_storage": "integer_minor_units",
+    "unknown_value": null,
+    "qualification_accepts_disclosure_level_1": true,
+    "overlap_must_be_resolved": true,
+    "automatic_currency_conversion": false,
+    "required_disclaimer": "Calculated from the organization's disclosures as of [date]; all funding has not been independently confirmed."
+  },
+  "risk_channels": {
+    "approved_applicability_matrix": null,
+    "mandatory_profile_ready": false,
+    "unconfigured_required_check_behavior": "pending_not_qualified",
+    "channel_states": [
+      "completed",
+      "not_applicable",
+      "incomplete",
+      "needs_review"
+    ],
+    "no_record_is_no_risk": false,
+    "arbitrary_comment_controls_qualification": false
+  },
+  "sorting": {
+    "fields": [
+      "case_city",
+      "organization_full_name",
+      "case_name"
+    ],
+    "direction": "ascending_A_to_Z",
+    "case_sensitive": false,
+    "separate_qualified_and_pending": true,
+    "proposed_stable_tiebreaker": "case_id",
+    "proposed_unknown_city_placement": "last_in_ontario_wide_pending_only",
+    "ranking_implies_trust": false
+  },
+  "models": {
+    "authoritative_facts_from_raw_output": false,
+    "model_can_set_qualification": false,
+    "review_extraction_max_calls": 1,
+    "followup_max_calls_if_needed": 1,
+    "template_output_default": true,
+    "automatic_provider_fallback": false,
+    "automatic_paid_retries": 0,
+    "supported_modalities": [],
+    "modality_status": "must_be_verified_per_configured_model"
+  },
+  "operational_limits": {
+    "model_provider": null,
+    "model_id": null,
+    "model_input_character_limit": null,
+    "model_output_token_limit": null,
+    "run_model_call_cap": null,
+    "session_model_call_cap": null,
+    "session_token_cap": null,
+    "source_read_timeout_seconds": null,
+    "model_timeout_seconds": null,
+    "run_timeout_seconds": null,
+    "session_budget_owner": null,
+    "unconfigured_hard_model_limits": "block_external_model_execution",
+    "timed_out_usage": "unknown_preserve_reservation"
+  },
+  "memory": {
+    "persist_sourced_case_facts": true,
+    "persist_unresolved_questions": true,
+    "preserve_corrections_and_versions": true,
+    "user_preference_scope": "current_session_only",
+    "personal_donation_profile": false,
+    "recall_does_not_override_current_gates": true
+  },
+  "visibility": {
+    "internal_step_trace_default_user_visible": false,
+    "current_sources_and_limits_accessible": true,
+    "explicit_historical_queries": true,
+    "history_uses_system_known_time_cutoff": true
+  },
+  "permissions": {
+    "payments": false,
+    "payment_credentials": false,
+    "autonomous_outreach": false,
+    "runtime_tool_installation": false,
+    "runtime_account_registration": false,
+    "runtime_policy_changes": false,
+    "access_control_bypass": false
+  },
+  "business_review": {
+    "simple_queue_sufficient_for_mvp1": true,
+    "reviewer_role": "authorized_product_operator_not_developer_by_default",
+    "authorized_reviewers": [],
+    "no_reviewer_behavior": "remain_pending",
+    "simulated_actions_must_be_labelled": true,
+    "restoration_requires_checkable_new_evidence": true,
+    "organization_statement_alone_sufficient": false,
+    "restoration_rechecks_all_gates": true,
+    "preserve_original_risk_history": true
+  }
+}

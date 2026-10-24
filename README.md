@@ -2,6 +2,10 @@
 
 Shared workspace for our Open Agent Hackathon 2026 ideas, mentor feedback and eventual project submission.
 
+## Purrpose first draft
+
+[Open the first draft review folder](first%20draft/README.md): interactive hard-coded wireframe, plain-English guide, full implementation specification and review instructions. The wireframe runs locally without API keys or external services. This is a review draft, not a finished product.
+
 **We have not selected the final idea yet.** Start with the two short overviews:
 
 - [Purrpose](ideas/purrpose.md): help donors examine animal rescue requests and their supporting evidence.
