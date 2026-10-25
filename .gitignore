@@ -21,3 +21,7 @@ private/
 .state/
 tmp/
 *.log
+
+# Generated local execution reports
+purrpose/artifacts/
+purrpose/research/live-read-result.json

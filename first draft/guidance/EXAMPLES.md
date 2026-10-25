@@ -274,3 +274,59 @@ Expected: record Ontario as the deployment target, verify applicable channels an
 Requester: “Use Thailand.”
 
 Expected: ask for any missing province/coverage boundary if needed, create a separate unvalidated region profile and list applicable channels/access tests. Implement the same common product workflow with that configuration, but do not claim qualification until required channels are approved/tested. Do not silently reuse Canadian registries or remove common gates. No knowledge of another team or demonstration is required.
+
+## 14. Three non-linear paths through the same synthetic case
+
+These are required sample traces, not evidence of executed agents. All sources and amounts are synthetic. No external calls are authorized by these examples.
+
+### A. Sufficient facts: skip unnecessary work
+
+Input: Maple has fresh validated sources covering all six synthetic gates, and a separate grant relationship is already established. Coordinator recalls compatible state and selects deterministic revalidation only. Funding code computes CAD 1,000 remaining. No dispute resolver and no model call are needed. Result: synthetic qualified, actual review time, source mapping and disclosure limitation.
+
+### B. A specific critique changes the action
+
+Input: the CAD 300 grant may be included in CAD 700 raised. Funding role returns `inclusion: unknown`, not a guessed number. Evaluator opens `ISSUE-GRANT-INCLUSION`, affecting funding and remainder gates. Coordinator creates a targeted repair task for the dispute resolver/funding role, allowing the approved synthetic updated case page only. The page states CAD 700 excludes the grant. Evaluator confirms same-case/date/source support; accepted relationship becomes `separate`. Code computes CAD 1,000 and gates run again. Identity/medical checks are reused only while still valid. Trace must show the issue caused the new source read and plan revision, not a pre-scripted obligatory second pass.
+
+Suggested task/output shapes (contracts, not existing endpoints):
+
+```json
+{
+  "task_id": "SYN-TASK-REPAIR-1",
+  "run_id": "SYN-RUN-REPAIR",
+  "case_id": "SYN-MAPLE",
+  "role": "dispute_resolver",
+  "goal": "Establish whether the disclosed grant is included in the raised total",
+  "issue_ids": ["ISSUE-GRANT-INCLUSION"],
+  "input_state_version": 3,
+  "permitted_source_ids": ["SYN-FUNDS-2"],
+  "permitted_tool_ids": ["fixture_source_reader"],
+  "expected_output_schema": "evidence_candidates_v1",
+  "dependencies": ["ISSUE-GRANT-INCLUSION"],
+  "limits": {"new_model_calls": 0, "source_reads": 1}
+}
+```
+
+```json
+{
+  "task_id": "SYN-TASK-REPAIR-1",
+  "status": "completed",
+  "issue_ids": ["ISSUE-GRANT-INCLUSION"],
+  "candidate_claims": [{
+    "field": "grant_inclusion", "value": "separate",
+    "source_id": "SYN-FUNDS-2", "location": "Funding disclosure, paragraph 2"
+  }],
+  "tool_outcomes": [{"tool_id": "fixture_source_reader", "status": "completed", "scenario_type": "synthetic"}],
+  "usage": {"model_calls": 0, "source_reads": 1},
+  "qualification": null
+}
+```
+
+`qualification: null` emphasizes that the task cannot approve a case. A schema may omit this field entirely. The evaluator and code gates must consume the return before it affects a result.
+
+### C. Stop honestly without human work
+
+Input: same grant ambiguity, but the only approved updated page omits inclusion or fails to load. Record the exact source outcome. After the bounded permitted repair, no useful action remains. Return `pending_evidence`, remainder null, dated known facts and the suggestion to publish a dated same-case statement clarifying inclusion. No invented zero grant, automatic paid retry, human ticket or waiting indefinitely.
+
+### D. Exceptional escalation, not a fourth mandatory step
+
+Input: two current high-credibility records match the organization but materially conflict about an eligibility-affecting restriction; permitted bounded investigation cannot reconcile them. Resolver produces a trigger-supported packet for business review. A missing medical document alone never takes this route. A confirmed relevant unresolved investigation or a proposed restoration of an established hold follows the existing risk rules. Qualification remains unavailable while an applicable hold is unresolved.

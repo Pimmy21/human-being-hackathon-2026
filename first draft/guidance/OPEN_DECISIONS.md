@@ -24,6 +24,14 @@ Risk-held cases require checkable new evidence before restoration, such as a for
 
 Deployments still need to designate authorized reviewers and map local procedural statuses; this does not reopen or weaken the confirmed restoration standard.
 
+### P5 — evidence-driven agents and exceptional human review — confirmed
+
+Six roles are coordination, identity/risk research, rescue-need research, funding/channel research, evaluation and dispute resolution. Run only needed roles; critique must cause concrete revised tasks where useful. Ordinary gaps automatically remain pending. Investigate disputes before human escalation; preserve established risk-hold restoration authority. FULL_GUIDANCE section 16 defines the contracts and escalation triggers. One targeted repair round is a low-credit demo cap, not extra inference authority or a production limit. This updates the earlier linear orchestration proposal without relaxing six-gate policy.
+
+### P6 — demo completion — confirmed
+
+The six-part contract in HUMAN_GUIDE R17 and FULL_GUIDANCE section 26 is approved. A real case need not qualify: honestly pending real information plus explicitly synthetic pass-path tests is acceptable. Actual behavior and integration evidence, not written descriptions, determine implementation completion. No renewed product interview is needed for these confirmed requirements. Missing permissions, runtime values and the approved source matrix remain deployment dependencies.
+
 ## 2. Access and operational decisions for the appropriate owner
 
 These generally need the configured account/resource or technical owner, not necessarily the product policy owner:
@@ -36,7 +44,7 @@ These generally need the configured account/resource or technical owner, not nec
 - Run/source/model deadlines and input/output bounds consistent with the intended demonstration and credits. Configuration must be completed before live inference.
 - Technical handling of provider errors, cancellation and reserved budget when billing is unknown.
 
-The guide fixes one extraction call per review by default and one follow-up call if needed; these are upper bounds, not instructions to call. Overall session spend still needs configuration.
+For the current low-credit demo only, the guide fixes one extraction call shared across all six roles per review and one follow-up call if needed; these are upper bounds, not instructions to call. Production must use a separate configured service budget with sufficient bounded work, rather than inheriting demo caps. Service pricing/funding and measurable ordinary-use cost, latency and quality targets remain to be decided by the service owner. A repair cannot borrow the follow-up allowance or reset the review budget. Configure total task/source-read caps and concurrency alongside model budgets before live execution. Overall session spend still needs configuration.
 
 ## 3. Evidence work that must still happen
 
@@ -51,7 +59,7 @@ A successful synthetic demonstration is useful engineering evidence but must not
 
 ## 4. Technical choices implementers can make
 
-Use the smallest working stack; a single orchestrator is sufficient. Choose validated data structures, local storage, adapter implementation, deterministic name normalization and a stable case-ID tie breaker. Place unknown cities last in the region-wide pending list as the suggested neutral representation. These details cannot change gate meaning, alter preference filtering or introduce a trust ranking.
+Use the smallest working stack implementing the six conditional roles and shared-state feedback loop in FULL_GUIDANCE section 16. A single coordinator process is sufficient; a fixed linear pipeline is not. Choose validated data structures, local storage, adapter implementation, deterministic name normalization and a stable case-ID tie breaker. Place unknown cities last in the region-wide pending list as the suggested neutral representation. These details cannot change gate meaning, alter preference filtering or introduce a trust ranking.
 
 Separate knowledge time from source time for historical queries. Choose a safe evidence-retention mechanism within actual permissions; full HTML/PDF archiving is not automatically allowed. Do not promise exact historical reconstruction where the permitted record is insufficient.
 

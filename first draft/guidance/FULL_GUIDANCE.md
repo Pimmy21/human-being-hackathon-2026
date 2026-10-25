@@ -1,8 +1,8 @@
 # Purrpose Full Product and Engineering Guidance
 
-Revision 2.1 · Portable implementation specification · Review draft · 24 October 2026
+Revision 2.2 · Portable implementation specification · Review draft · 24 October 2026
 
-**Publication status: first draft shared for review with owner approval, not production approval.** This specification is self-contained: it does not assume a particular team, chat history, repository, country of residence or existing application. Interfaces and data structures are implementation contracts, not claims that application code exists. First complete the deployment setup in section 3. Unresolved settings are listed in OPEN_DECISIONS.md. HUMAN_GUIDE.md is the plain-English companion; RULE_MAP.md links both versions using stable rule IDs.
+**Revision status: local 2.2 update for review; not yet uploaded. The earlier 2.1 first draft was shared with owner approval. No production approval.** This specification is self-contained: it does not assume a particular team, chat history, repository, country of residence or existing application. Interfaces and data structures are implementation contracts, not claims that application code exists. First complete the deployment setup in section 3. Unresolved settings are listed in OPEN_DECISIONS.md. HUMAN_GUIDE.md is the plain-English companion; RULE_MAP.md links both versions using stable rule IDs.
 
 ## 1. Purpose
 
@@ -208,7 +208,7 @@ There is no continuous background monitor in MVP 1. Without a notification or re
 
 ### 12.3 Incremental review
 
-Funding update → recheck amount/date/overlap/remainder. Medical update → recheck case linkage/treatment/cost/freshness. Identity, donation-channel or risk update → recheck relevant qualification and route unresolved risk to human review.
+Funding update → recheck amount/date/overlap/remainder. Medical update → recheck case linkage/treatment/cost/freshness. Identity, donation-channel or risk update → recheck affected qualification, investigate specific issues automatically, and escalate only under section 16.6.
 
 Other checks can be reused only if unexpired, policy-compatible and unaffected. If impact cannot be determined, recheck all six gates. A new rule version requires re-evaluating the relevant policy-dependent checks before qualification.
 
@@ -225,7 +225,7 @@ Reuse validated extraction keyed by content fingerprint, parser/model version, p
 ### 13.1 Risk actions
 
 - An identifiable, relevant formal finding of corruption/fund misuse prevents qualified recommendation and remains visible with source/date/scope. Restoration requires authorized business review plus all six gates.
-- A substantiated ongoing investigation or unresolved allegation requires pending/human review, with no finding of guilt implied.
+- A substantiated investigation or credible unresolved allegation triggers pending status and automated identity/procedural checks first. Escalate only under section 16.6; imply no finding of guilt.
 - Unattributed accusations, generic negative reviews and duplicate hearsay remain leads. Do not automatically suspend on arbitrary comments.
 - A financial discrepancy, registration revocation or sanction does not by itself establish corruption. Read the reason and procedural status.
 
@@ -242,7 +242,7 @@ For each applicable region profile record:
 - `completed`: a valid scoped query/read, correct identity matching and recorded outcome.
 - `not_applicable`: documented reason the channel does not cover this entity type; not a substitute for an inaccessible required check.
 - `incomplete`: not executed, inaccessible, failed or unable to establish correct identity.
-- `needs_review`: potentially relevant material or ambiguous match/status requiring business review.
+- `needs_review`: potentially relevant material or ambiguous match/status requiring automated investigation first; business review only under section 16.6.
 
 For identity, no match means identity unestablished, not proof that no registration exists. For risk, a valid completed query with no match means “No relevant record found in this channel within the checked scope,” not “No risk.” Empty errors and blank pages do not count as negative results.
 
@@ -280,26 +280,85 @@ The running product may query the configured case collection, read authorized pu
 
 It may not install new tools, register accounts, buy credits, modify policy, bypass access restrictions, expose endpoints, contact third parties or handle money. Unsupported material becomes a recorded capability gap with a suggested next step. Development assistants have their separately granted coding/tool permissions; do not confuse them with runtime permissions.
 
-## 16. Orchestrator workflow
+## 16. Evidence-driven agent system
 
-Use a small inspectable orchestration pipeline. A multi-agent architecture is not required. Internal design can vary if contracts and tests hold.
+### 16.1 Required architecture and authority
 
-Keep data reality separate from execution mode. `scenario_type` describes each source/case as public real, historical snapshot or synthetic. `execution_mode` is `fixture` (local fixtures/mocked external adapters, no external retrieval/inference), `replay` (explicit saved-source versions; any separately selected real inference call must still be authorized, budgeted and recorded), or `live` (the configured current-source/provider path, with valid caches and reuse still disclosed). Real H-MEM can run in all three modes. A live model call over synthetic data is not real-case verification, and a live run must not silently substitute a snapshot after source failure.
+Implement six specialized agent roles with shared case state and conditional delegation. Their decisions must change in response to evidence; a fixed sequence of prompt wrappers does not meet this contract. A coordinator process may host all six roles. Six roles do not require six models, six processes or six model calls. Structured tools and code may complete a role's task without inference. Record whether a decision used code, a model, cached validated facts or a fixture. A fully scripted fixture proves routing mechanics, not live autonomous reasoning.
 
-1. **Request:** validate intent, case/organization input, region/session and explicit fixture/replay/live mode.
-2. **Scope and preference:** enforce supported scope; ask for city once if discovery needs it.
-3. **Candidates:** obtain curated in-scope candidates or resolve the supplied case/source to a candidate. Preserve unconfirmed linkage.
-4. **Budget/reuse plan:** check allowed calls, review cache, extraction cache and relevant H-MEM context. Do not spend inference just to sort or compute.
-5. **Sources:** read authorized uncached/changed sources; record success, failure, applicability and current evidence versions separately.
-6. **Extraction:** parse structured fields locally where possible; when needed make at most the configured one model extraction call for this review action, with bounded source excerpts. Mark unprocessed material if limits are reached.
-7. **Validation:** verify proposed fields/citations/case identity/units/date scope. Ambiguous model fields remain unconfirmed.
-8. **Gates:** execute the six deterministic checks and applicable risk/channel rules. Calculate disclosure-based remainder in code.
-9. **Business review routing:** preserve unresolved matters in a minimal queue/record; no invented human approval.
-10. **Persistence:** save reviewed evidence/case version, relevant H-MEM record and technical run trace. Do not overwrite earlier conclusions.
-11. **Output:** render structured findings, gap lists and limitations through templates. AI prose is optional and separately checked if requested/authorized.
-12. **Result lookup:** return actual review time/version. Revalidation on later display may invalidate the cached qualification.
+| Role ID | Responsibility | Required return | Authority limit |
+|---|---|---|---|
+| coordinator | Select needed work from current evidence, issues, policy and budget; revise the plan | Bounded task assignments or a terminal decision, each with a concise reason | Cannot waive gates, broaden geography silently, authorize spending or clear a risk hold |
+| identity_risk | Check applicable identity, geography and organization-risk channels | Matched identifiers, current status, scoped channel outcomes, evidence links and unresolved risks | No no-risk guarantee; missing channel is incomplete |
+| rescue_need | Link the public request and medical material to the same cat/group | Candidate medical claims, issuer/date/case linkage and missing fields | Content reading does not authenticate the issuer |
+| funding_channel | Check costs, funds, inclusion relationships and official external donation channel | Source-linked candidate amounts/relationships and channel-ownership evidence | Code computes amounts; no payment actions |
+| evaluator | Challenge source support, case identity, dates, independent origins and conflicting claims | Per-claim accept/reject/unresolved findings and actionable issue records | Cannot validate a claim merely because another agent agrees |
+| dispute_resolver | Investigate an evaluator's specific unresolved issue before considering human escalation | New evidence, reasoned issue disposition, or documented exhaustion/escalation trigger | Cannot invent missing facts, approve policy exceptions or restore an established risk hold |
 
-The technical trace may show actual execution ordering chosen by the implementation. It must expose which step failed, rather than forcing failures into a generic AI error. Retrieval can happen before source fetch, but stale recalled facts cannot bypass validation.
+The coordinator starts only the roles needed for the current case/version. Independent checks may run concurrently when budgets and source permissions allow. A funding-only update normally reopens funding and dependent evaluation/calculation, not every successful identity check. Unclear impact reopens all relevant gates. Risk holds remain effective while investigation runs.
+
+### 16.2 Shared state and handoff contracts
+
+Store a versioned case workspace: case/organization IDs, scenario type, policy version, evidence versions, candidate and validated claims, origin groups, gate states, open issues, task/dependency states, plan revision, attempted actions, risk holds, H-MEM links and budget/deadline reservations. Keep session preferences separate. Task-local notes are not authoritative shared facts.
+
+Every task carries `task_id`, `run_id`, `case_id`, `role`, `goal`, `issue_ids`, `input_state_version`, permitted source/tool IDs, expected output schema, dependencies and allocated limits. Return `status` (completed/incomplete/blocked/cancelled), candidate claims with source locations, issue IDs, tool outcomes and usage. Validate schema and scope before merging. A single coordinator commits versioned updates atomically. Reject or revalidate stale task results if their dependencies changed; late results cannot overwrite newer facts or publish after cancellation.
+
+An issue records `issue_id`, category, affected claims/gates, evidence references, why it matters, required resolution, attempts, status and next permitted actions. An evaluator must say, for example, “Determine whether grant G is included in total F; do not calculate the remainder until inclusion is established,” rather than “research more.” Evaluator acceptance means a candidate meets the stated evidence standard, not independent authentication of its publisher.
+
+### 16.3 Decision loop
+
+Validate request/scope/mode, recall relevant H-MEM context, inspect reusable results and initialize unresolved checks. Then repeat bounded decisions:
+
+1. Inspect the latest state. Reuse still-valid completed checks; identify the decision-critical missing or conflicting information.
+2. Select authorized tasks that could resolve those issues. Skip irrelevant roles. Reserve available resources before dispatch, including concurrent tasks.
+3. Gather/interpret evidence using connected tools; validate returns and record source success/failure individually.
+4. The evaluator checks new candidate claims and their dependency effects. Accepted claims update shared state; specific defects return to the coordinator, which may delegate targeted investigation to the dispute resolver and relevant specialist.
+5. The dispute resolver first checks mistaken identity, different cases/dates, duplicated origins, superseded records and funding overlap. It may request a permitted alternative source or return a precise follow-up task. A changed document must be read, not merely described by another agent.
+6. Recompute affected gates with deterministic code. Finish if the result is established, if no useful permitted action remains, or if limits are reached. Otherwise revise the plan with a recorded reason.
+
+Persist each material state/decision change and the final version with useful H-MEM linkage. Render the result through templates; optional prose remains separately validated. Revalidate freshness and update signals on subsequent display. Historical queries remain bounded by system-known time.
+
+Keep data reality separate from execution mode. `scenario_type` is public real, historical snapshot or synthetic. `execution_mode` is `fixture` (mocked external retrieval/inference), `replay` (explicit saved sources, separately budgeted real inference only if selected), or `live` (configured current-source path with disclosed valid caches). Real H-MEM can run in all modes. A live model over synthetic material is not real-case verification. No silent snapshot substitution after a live failure.
+
+### 16.4 Branches and terminal outcomes
+
+| Condition | Required action |
+|---|---|
+| Sufficient compatible validated evidence | Apply gates and return qualified only if every gate passes; skip unnecessary investigation |
+| Ordinary missing/expired material or unavailable mandatory source | Targeted permitted lookup if useful; otherwise pending with known facts, gaps and information channels; no automatic human ticket |
+| Specific conflict with a plausible resolution | Dispute resolver investigates, returns evidence to evaluator, coordinator revises only affected work |
+| Optional source unavailable | Retain otherwise complete checks; disclose limitation |
+| Supported formal relevant fund-misuse finding | Apply the existing hold automatically; no human permission needed to suspend |
+| Credible investigation or ambiguous adverse identity match | Resolve identity/procedural scope automatically first; confirmed relevant unresolved investigation remains held/pending and meets the human escalation rule |
+| Prose-only failure | Show completed structured results, with explanation unavailable |
+| Required extraction still unvalidated | Pending, even when other roles agree |
+| Budget/deadline/capability exhausted or no useful next action | Stop new work, preserve partial results and state exactly what remains unknown |
+
+Record one terminal disposition per run: `completed` (decision established, which can include no funding gap or an active hold), `pending_evidence`, `pending_human`, `blocked_configuration`, or `cancelled`. These execution dispositions are separate from case qualification. No terminal label itself passes a gate.
+
+### 16.5 Bounded repair, not unlimited retries
+
+Before attempting a repair, identify a new evidence target or specific correction. Do not repeat an identical source read/model request over unchanged inputs hoping for agreement. Use an attempt key covering case, issue, operation, source/version and relevant model/prompt/schema. Keep unsuccessful attempts in state so roles cannot bounce an issue indefinitely.
+
+Low-credit demo profile only: at most one initial research round plus one targeted repair round (`max_repair_rounds: 1`), adjustable only as an explicit configured operational limit within the approved budget. This is not permission for an extra paid inference call. The existing one-extraction-call default remains shared across all roles in a review; changing a role name or starting a child task does not reset it. Use structured parsing and existing validated evidence first. If a repair needs a second extraction, stop with a capability/budget limitation unless a separate limit change is authorized. Follow-up allowances do not top up the same review.
+
+The demo permits no automatic paid retry after a timeout, 429, invalid model output or authorization failure. Production may use an explicitly approved bounded retry policy for eligible transient failures, accounting for possible billing, idempotency and deadlines; authorization failures require configuration correction, not blind retries. An alternative approved public source may be queried within configured source/task limits, with the failed channel still recorded accurately; it cannot satisfy a mandatory named channel unless the approved applicability policy permits it. No silent provider fallback or unconfigured tool. Budget and deadline checks apply at every dispatch and before committing results. An explicit retry resumes from valid state, not a fresh budget disguised as a new agent.
+
+Production uses separately configured repair/extraction limits under section 18, not the demo cap. The shared-budget, no-unchanged-repeat and termination contracts apply in every profile.
+
+### 16.6 Human escalation is exceptional
+
+The dispute resolver precedes ordinary evidence-dispute escalation. Missing documents, unknown funding totals, missing API credentials and exhausted budgets normally produce automatic pending/blocked results, not human review. Do not delay a required hold while attempting automated resolution.
+
+Create a human review record only for a documented trigger: (a) a confirmed relevant unresolved investigation; (b) material high-credibility contradictory evidence that bounded permitted investigation cannot resolve and that affects eligibility; (c) restoration of an already established risk hold; or (d) a policy exception, appeal or requested policy change. For restoration, automated collection may prepare the evidence but cannot clear the hold. A mistaken match discovered before an adverse record was established as belonging to this organization may be rejected automatically with identifier-based evidence. If an established hold already exists, correcting that match still requires authorized restoration review.
+
+The escalation packet includes trigger, evidence and identity match, attempted resolution, remaining question, affected gates, safe current result and requested decision. The software checks the trigger; a model cannot declare “human needed” without supporting fields. Policy decisions go to the policy owner, evidence decisions to the authorized business reviewer, credentials/spend to the account owner. No reviewer/no action means the hold or pending state remains. Users can still see supported facts and gaps; no operator is required for every request.
+
+### 16.7 Observable proof of nonlinearity
+
+Demonstrate three paths on comparable labelled cases: sufficient evidence skips repair; a specific defect changes the plan and is resolved by new evidence; an unresolved defect ends honestly at a limit without forced approval. Also test funding-only incremental review and exceptional human escalation. Trace parent/child task IDs, plan versions, triggering issue/evidence, selected/skipped roles, state changes, resource use and terminal reason. Concise decision records suffice; do not store hidden chain-of-thought.
+
+A diagram with arrows or multiple role prompts is not acceptance evidence. Tests must assert different actual actions for different evidence states, and a live agent claim requires a real task decision and useful tool result consumed by that decision. Report fixture routing, model decisions and real provider integrations separately.
 
 ## 17. Model responsibility and output checks
 
@@ -311,19 +370,29 @@ Separate provider transport success, extraction validation and explanation-publi
 
 If model reading fails, distinguish unreadable content, uncertain extraction and invalid output. Preserve source/issue. No automatic paid retry or provider switch. If critical facts cannot otherwise be validated, remain pending; if only prose fails, display structured evidence with “AI explanation unavailable” or “Draft held for review.”
 
-## 18. Low-credit operation
+## 18. Efficient operation and budget profiles
+
+Use an explicit operational profile: `demo_low_credit` or `production`. The numerical one-extraction/one-repair limits below apply only to `demo_low_credit`. They are not permanent product rules. Production limits must be configured separately; missing production values block external work rather than silently inheriting demo limits.
 
 Current account balances and billing entitlements are not known. Never state a remaining credit amount or guarantee free service. Start with one case reused across the demonstration and a very small curated set.
 
-Use code for sorting, freshness, matching verified identifiers, arithmetic and templates. Default maximum extraction calls per review action: one, only if needed. Do not call the model when compatible validated extraction already exists. Follow-up questions first use structured facts and memory; if inference is needed, permit at most one bounded call and cache only against the same evidence/policy/question version.
+Use code for sorting, freshness, matching verified identifiers, arithmetic and templates. For the low-credit demo only, maximum extraction calls per review action: one, only if needed. Do not call the model when compatible validated extraction already exists. Follow-up questions first use structured facts and memory; if inference is needed, permit at most one bounded call and cache only against the same evidence/policy/question version.
 
-No automatic best-of-N, repeated explanation rewrites, multi-model voting or background polling. A provider failure does not authorize another paid attempt. Budget denial is a recorded failed/incomplete step, not absence of evidence.
+For the demo, no automatic best-of-N, repeated explanation rewrites, multi-model voting or background polling. A provider failure does not authorize another paid attempt. Budget denial is a recorded failed/incomplete step, not absence of evidence.
 
 The project needs configured run/session call and token caps, input caps and timeouts before live use. These must not be guessed as account affordability. Unconfigured hard budget settings block external model execution; fixture-only engineering can continue. Reserve budget before scheduling calls and record returned usage. Unknown usage is null. A timed-out external call may still be billed: record uncertain usage and do not release its reservation as if nothing happened.
 
 Prevent duplicate clicks using an idempotency key. Set per-step deadlines and a run deadline; no endless spinner or unlimited waiting. Retry only explicitly requested eligible failed steps and consider intervening source/policy changes. Cancellation stops new calls and labels any external call already underway honestly.
 
 With more budget, expand cases/regions, refresh frequency and evaluated multimodal reading. Extra credits do not create source permission, prove authenticity or remove gate requirements. Scheduled monitoring is a future feature with separate operational rules.
+
+### 18.1 Production efficiency and user experience
+
+Production has separately approved service-level call/token/cost, source-read, repair, concurrency and deadline settings. Allocate sufficient bounded work for useful supported requests; do not arbitrarily stop at one model extraction because the demo did. Budget is shared across roles and cannot reset through child tasks. Retries require an explicit policy covering eligible error classes, attempt/backoff caps, uncertain billing and duplicate prevention; no silent provider substitution or endless loops.
+
+Manage provider credentials and execution budgets on the backend. Ordinary supporters and organizations should not need to understand tokens, supply provider keys or repeatedly purchase credits to complete a supported journey. Service pricing, funding and any optional bring-your-own-key mode are unresolved business choices, not implied features. Never promise zero cost or a guaranteed complete result when evidence is unavailable.
+
+Before production release, define measurable ordinary-use cost, latency and completion-quality targets with the service owner. Evaluate representative complete, missing, conflicting and updated cases, including cache hits and misses. Report cost per useful result, cache reuse, model/source calls, latency and unresolved outcomes. Choose efficient models/tools and reuse validated shared public evidence without weakening per-case checks or leaking scoped data. Unmet targets require optimization or a clear supported-scope decision, not hidden lower evidence standards. Larger coverage, stronger evidence interpretation and bounded repair can be funded without forcing every user request to trigger every agent.
 
 ## 19. Adapter contracts and connection acceptance
 
@@ -367,7 +436,7 @@ Development assistants help implement and test adapters, workflow and specificat
 
 Users normally see the result, sources, relevant limits and actual review time, not internal per-step logs or model activity. Evidence links remain accessible without requiring a history request. Keeping the workflow internal must not hide substantive uncertainty.
 
-Every run has a unique ID and step records. Minimum fields: step, operation, source/tool/provider/model, started/ended time, result state, sanitized error/status code, impact on gates, reuse/cache marker and next useful action. Record available usage and its uncertainty. Never record API keys, auth headers, private donor content or unrestricted chain-of-thought. A concise decision reason and evidence mapping are sufficient.
+Every run has a unique ID, agent task/issue/plan-revision records (section 16) and step records. Minimum fields: step, operation, source/tool/provider/model, started/ended time, result state, sanitized error/status code, impact on gates, reuse/cache marker and next useful action. Record available usage and its uncertainty. Never record API keys, auth headers, private donor content or unrestricted chain-of-thought. A concise decision reason and evidence mapping are sufficient.
 
 Distinguish inference timeout from output held for invalid citations. In either case qualified structured results can remain if every necessary check was independently completed. Failure in critical extraction/validation does not qualify merely because templates can render a page.
 
@@ -383,9 +452,11 @@ Maintain both source-effective time and system-known/recorded time. If an old re
 
 Business reviewers are authorized product operators, not developers automatically assigned ongoing review duties. MVP 1 needs only a simple queue/record, not a full management UI. Demo reviewer actions must be labelled simulated unless a legitimate operational process exists.
 
+Create a queue record only when section 16.6 supplies a supported exceptional trigger. Ordinary unresolved gaps are not operator tasks.
+
 Queue record: case/organization/version, trigger, source links, relevant conflicts, completed checks, current hold, reviewer identity/authority, action/time/reason and subsequent version. No assigned reviewer/no action means still pending. Resolving one disputed item does not skip any other gate. Restoring qualification after risk requires authorized review and all six current gates.
 
-Business reviewers handle evidence disputes within policy. Policy boundaries, thresholds and acceptance changes go to the designated product policy owner. Developers fix code and tests; account holders authorize resources and credentials. Never fabricate a reviewer sign-off.
+Business reviewers handle only the exceptional evidence decisions listed in section 16.6. Ordinary gaps are automatically pending, and the dispute resolver investigates before eligible escalation. Policy boundaries, thresholds and acceptance changes go to the designated product policy owner. Developers fix code and tests; account holders authorize resources and credentials. Never fabricate a reviewer sign-off.
 
 ## 23. Proposed technical interfaces
 
@@ -403,7 +474,7 @@ For HTTP implementation, use a validated API layer and run polling for long acti
 
 ## 24. Required data and configuration
 
-Minimum durable entities: organization, case, evidence item/version, candidate extraction, validated claim, funding item/relationship, review/gate result, risk-channel check, run/step, feedback item, H-MEM record link, business review record and policy version.
+Minimum durable entities: agent task/plan revision, shared-state version, issue/resolution attempt, organization, case, evidence item/version, candidate extraction, validated claim, funding item/relationship, review/gate result, risk-channel check, run/step, feedback item, H-MEM record link, business review record and policy version.
 
 Use explicit scenario type (`public_real`, `historical_snapshot`, `synthetic`) at case/source/result level. Real identity mixed with a synthetic case remains a synthetic demonstration, not a real request by that organization.
 
@@ -415,7 +486,7 @@ See policy.example.json and EXAMPLES.md. These specify shape and behavior but do
 
 At implementation setup, identify responsibility for product policy, coordination, evidence research, backend/integrations, testing and demonstration. One person may hold multiple roles; nobody is assigned implicitly by this document. Keep a short task/owner/branch/status record. Technical owners can use coding assistants with granted permissions.
 
-Build order: (1) confirmed schema/config and labelled fixtures; (2) deterministic gates/funding/sort; (3) supporter and organization outputs; (4) real H-MEM recall and one controlled update; (5) bounded model and data adapters with truthful failures; (6) run trace and acceptance checks; (7) one-case demonstration. Frontend styling is outside this review and must not block core logic.
+Build order: (1) confirmed schema/config and labelled fixtures; (2) deterministic gates/funding/sort; (3) shared-state task coordinator, issue contracts and the three non-linear fixture paths; (4) supporter/organization outputs and real H-MEM recall across one controlled update; (5) bounded model and data adapters with truthful failures; (6) task/plan trace and acceptance checks; (7) one-case demonstration. Frontend styling is outside this review and must not block core logic.
 
 Independent work can proceed when a provider or risk source is blocked. Mock tests must be labelled. Developers resolve imports, branch conflicts and routine adapter bugs using their granted permissions. Escalate product-boundary/acceptance/policy decisions to the product policy owner; access and spending go to the relevant resource owner. If an owner is unavailable, preserve existing rules and continue independent work.
 
@@ -427,7 +498,9 @@ Handoff format: owner/task, branch/PR, files, actual verification/commit, mode/r
 
 ## 26. Acceptance and demonstration
 
-The minimal demo proves four functions:
+The six-part demo completion contract is confirmed: supporter evidence output; organization public-link gap review; demonstrated non-linear evidence-dependent actions; useful memory and incremental public-update review with history; separate actual-use evidence for each claimed NVIDIA/H-MEM/Nightshift/Zetaris integration; and an on-request sanitized backend view of decisions, failures and usage. Each is an observable requirement, not a claim of existing implementation.
+
+The minimal demo proves four user-facing functions and the non-linear behavior specified in section 16.7:
 
 1. A supporter expresses intent and receives a qualifying case or an honest pending list with full organization information and sources.
 2. An organization points to its public information and receives actionable missing-information suggestions.

@@ -1,6 +1,6 @@
 {
-  "document_status": "first_draft_shared_for_review_not_production_approved",
-  "policy_version": "purrpose-mvp1-draft-v2.1",
+  "document_status": "local_v2_2_review_update_not_uploaded",
+  "policy_version": "purrpose-mvp1-draft-v2.2",
   "configuration_kind": "Ontario_reference_profile_not_an_implicit_deployment_target",
   "deployment_setup": {
     "target_country": null,
@@ -109,7 +109,8 @@
     "automatic_provider_fallback": false,
     "automatic_paid_retries": 0,
     "supported_modalities": [],
-    "modality_status": "must_be_verified_per_configured_model"
+    "modality_status": "must_be_verified_per_configured_model",
+    "review_call_limit_scope": "all_roles_and_repair_rounds_combined"
   },
   "operational_limits": {
     "model_provider": null,
@@ -124,7 +125,11 @@
     "run_timeout_seconds": null,
     "session_budget_owner": null,
     "unconfigured_hard_model_limits": "block_external_model_execution",
-    "timed_out_usage": "unknown_preserve_reservation"
+    "timed_out_usage": "unknown_preserve_reservation",
+    "run_task_cap": null,
+    "run_source_read_cap": null,
+    "max_concurrent_tasks": null,
+    "unconfigured_task_source_limits": "block_live_task_dispatch"
   },
   "memory": {
     "persist_sourced_case_facts": true,
@@ -158,6 +163,57 @@
     "restoration_requires_checkable_new_evidence": true,
     "organization_statement_alone_sufficient": false,
     "restoration_rechecks_all_gates": true,
-    "preserve_original_risk_history": true
+    "preserve_original_risk_history": true,
+    "ordinary_missing_evidence_requires_human": false,
+    "automated_dispute_investigation_first": true
+  },
+  "agent_system": {
+    "architecture": "evidence_driven_shared_state",
+    "roles": [
+      "coordinator",
+      "identity_risk",
+      "rescue_need",
+      "funding_channel",
+      "evaluator",
+      "dispute_resolver"
+    ],
+    "all_roles_required_each_run": false,
+    "mandatory_model_call_per_role": false,
+    "coordinator_is_single_state_writer": true,
+    "evaluate_before_authoritative_merge": true,
+    "stale_task_results": "reject_or_revalidate_changed_dependencies",
+    "max_repair_rounds": 1,
+    "repair_limit_status": "reference_engineering_default_within_approved_budget",
+    "identical_unchanged_attempts": "do_not_repeat",
+    "ordinary_gaps": "pending_without_human_ticket",
+    "human_escalation_triggers": [
+      "confirmed_relevant_unresolved_investigation",
+      "material_high_credibility_conflict_unresolved_after_bounded_checks",
+      "established_risk_hold_restoration",
+      "policy_exception_appeal_or_change"
+    ],
+    "established_risk_hold_auto_clear": false,
+    "terminal_run_dispositions": [
+      "completed",
+      "pending_evidence",
+      "pending_human",
+      "blocked_configuration",
+      "cancelled"
+    ]
+  },
+  "operational_profile": "demo_low_credit",
+  "budget_profile_scope": "Numeric example limits are demo-only; production requires separate explicitly configured limits",
+  "production_profile": {
+    "configured": false,
+    "review_extraction_max_calls": null,
+    "followup_max_calls_if_needed": null,
+    "max_repair_rounds": null,
+    "retry_policy": null,
+    "ordinary_use_cost_target": null,
+    "ordinary_use_latency_target": null,
+    "completion_quality_target": null,
+    "pricing_and_service_funding": "unresolved_business_decision",
+    "user_manages_provider_tokens_required": false,
+    "unconfigured_behavior": "block_external_dispatch_do_not_inherit_demo_caps"
   }
 }

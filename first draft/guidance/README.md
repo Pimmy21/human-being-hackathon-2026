@@ -1,8 +1,8 @@
-# Purrpose Guidance v2.1
+# Purrpose Guidance v2.2
 
-**First draft published for review with owner approval. Not approved for production deployment.**
+**Local 2.2 revision for review, not yet uploaded. The earlier 2.1 draft was published with owner approval. No production deployment approval.**
 
-Revised 24 October 2026. This package is intended for any authorized implementer and their AI development assistant. It requires no knowledge of the original conversation, a particular team, a particular repository or a developer's country of residence. This copy is published for review with owner approval. It is not a completed product or production deployment approval.
+Revised 24 October 2026. This package is intended for any authorized implementer and their AI development assistant. It requires no knowledge of the original conversation, a particular team, a particular repository or a developer's country of residence. This revision adds evidence-driven six-role orchestration and exceptional human escalation; it is being reviewed locally. It is not a completed product or production deployment approval.
 
 ## Two versions of the same product rules
 
@@ -15,7 +15,9 @@ Implementation supporting files:
 1. [Input and output examples](EXAMPLES.md): concrete behavior and failure scenarios.
 2. [Acceptance cases](ACCEPTANCE_CASES.md): observable checks to implement and run.
 3. [Open decisions](OPEN_DECISIONS.md): unresolved policy and operational settings, with the responsible role.
-4. [Configuration example](policy.example.json): the Ontario reference configuration and explicit unconfigured blockers, not a deployed application.
+4. [Revision notes](REVISION_NOTES.md): what changed in 2.2 and what is still unimplemented.
+5. [Development task list](BUILD_PLAN.md): dependencies, first increment and actual completion evidence.
+6. [Configuration example](policy.example.json): the Ontario reference configuration and explicit unconfigured blockers, not a deployed application.
 
 [AGENTS.md](AGENTS.md) gives implementation assistants a short entry point. All normative rules are in the linked documents. No credentials, account access, permission to publish or unattended execution are provided by this folder.
 
@@ -32,4 +34,4 @@ Frontend design is intentionally deferred. Required information and interactions
 
 It is not a complete runnable application, a successful live all-provider demo, a legal background check, or proof that a real fundraising case meets the gates. Acceptance cases are requirements to implement, not passing test results.
 
-This first draft is shared in the project repository for review. It does not authorize live deployment, paid integrations or product-policy changes. No prior account, prototype, dataset table or local filesystem path is assumed.
+The previously shared first draft is the baseline. This local revision has not yet been uploaded. It does not authorize live deployment, paid integrations or product-policy changes. No prior account, prototype, dataset table or local filesystem path is assumed.

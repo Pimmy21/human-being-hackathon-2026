@@ -1,0 +1,34 @@
+{
+  "notice": "Sanitized recorded candidate envelope from the single authorized NVIDIA request on 24 October 2026. Synthetic source only. Replay makes no external request. A fingerprint checks content identity, not truth.",
+  "current_passage": {
+    "source_id": "SYN-MED-COST",
+    "case_id": "SYN-MAPLE",
+    "passage_id": "cost-line",
+    "source_version": "synthetic-v1",
+    "text": "Synthetic Maple case. Treatment estimate: CAD 2,000.00."
+  },
+  "capture": {
+    "provider": "nvidia",
+    "scenario_type": "synthetic",
+    "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+    "source_fingerprint": "00d770cbce0b0c9bbedcbf88e8fa7f11320ab4ad08fed76fe74e61586cc5f436",
+    "candidates": [
+      {
+        "field": "cost_minor",
+        "value": 200000,
+        "source_id": "SYN-MED-COST",
+        "case_id": "SYN-MAPLE",
+        "passage_id": "cost-line",
+        "quote": "Treatment estimate: CAD 2,000.00.",
+        "source_version": "synthetic-v1",
+        "authority": "candidate_only",
+        "requires_domain_validation": true
+      }
+    ],
+    "original_usage": {
+      "prompt_tokens": 191,
+      "completion_tokens": 90,
+      "total_tokens": 281
+    }
+  }
+}

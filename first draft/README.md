@@ -1,5 +1,7 @@
 # Purrpose First Draft
 
+Local v2.2 guidance revision: adds evidence-driven agent roles and bounded dispute resolution. Not yet uploaded. The wireframe remains the earlier synthetic illustration and does not implement this agent loop.
+
 Three things to review together. This is an initial workflow and implementation draft, not a live product.
 
 ## 1. Interactive workflow wireframe

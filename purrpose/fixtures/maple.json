@@ -1,0 +1,75 @@
+{
+  "notice": "Wholly synthetic, prestructured test evidence; no real registry, medical or payment verification.",
+  "case": {
+    "case_id": "SYN-MAPLE",
+    "case_name": "Maple treatment",
+    "organization": "Example Ontario Cat Care (fictional)",
+    "city": "Ottawa",
+    "scenario_type": "synthetic",
+    "review_date": "2026-10-24",
+    "currency": "CAD",
+    "synthetic_risk_profile_ready": true,
+    "initial_sources": {
+      "identity_risk": "registry-risk",
+      "rescue_need": "medical",
+      "funding_channel": "funding"
+    },
+    "repair_sources": [
+      "funding-update"
+    ],
+    "sources": {
+      "registry-risk": {
+        "role": "identity_risk",
+        "publisher": "Synthetic registry and risk fixture",
+        "origin_group": "Synthetic registry and risk fixture",
+        "case_id": "SYN-MAPLE",
+        "status": "available",
+        "date": "2026-10-24",
+        "facts": {
+          "identity_active": true,
+          "in_region": true,
+          "risk_complete": true,
+          "risk_hold": false
+        }
+      },
+      "medical": {
+        "role": "rescue_need",
+        "publisher": "Synthetic veterinary issuer",
+        "origin_group": "Synthetic veterinary issuer",
+        "case_id": "SYN-MAPLE",
+        "status": "available",
+        "date": "2026-10-24",
+        "facts": {
+          "medical_linked": true,
+          "cost_minor": 200000
+        }
+      },
+      "funding": {
+        "role": "funding_channel",
+        "publisher": "Synthetic rescue public page",
+        "origin_group": "Synthetic rescue public page",
+        "case_id": "SYN-MAPLE",
+        "status": "available",
+        "date": "2026-10-24",
+        "facts": {
+          "raised_minor": 70000,
+          "grant_minor": 30000,
+          "grant_inclusion": "unknown",
+          "channel_owned": true
+        }
+      },
+      "funding-update": {
+        "role": "funding_channel",
+        "publisher": "Synthetic rescue public page",
+        "origin_group": "Synthetic rescue public page",
+        "case_id": "SYN-MAPLE",
+        "status": "available",
+        "date": "2026-10-24",
+        "facts": {
+          "grant_inclusion": "separate"
+        },
+        "supersedes": "funding"
+      }
+    }
+  }
+}

@@ -1,6 +1,6 @@
 # Purrpose Plain English Guide
 
-Version 2.1 · Review draft · 24 October 2026
+Version 2.2 · Local update, not yet uploaded · Review draft · 24 October 2026
 
 This is the human companion to FULL_GUIDANCE.md. Both describe the same product. Use the rule IDs below and RULE_MAP.md to compare them. This version explains decisions without code; it does not remove evidence requirements. Visual design is a separate later task.
 
@@ -65,7 +65,7 @@ The first version accepts the organization's dated disclosures when otherwise su
 
 Check the configured applicable official channels and record their coverage. “No record found in these checks” is not “no risk.” A failed search is not a clean result. Some channels do not apply to every organization type, and this needs a documented reason.
 
-A relevant formal fund-misuse finding triggers a hold. A substantiated unresolved investigation requires business review, not a statement of guilt. Anonymous or unsupported complaints remain leads. Registration penalties or revoked status are not automatically corruption.
+A relevant formal fund-misuse finding triggers a hold. A suspected relevant investigation is first checked for identity and current status automatically. A confirmed relevant unresolved investigation stays pending and requires exceptional business review, not a statement of guilt. Anonymous or unsupported complaints remain leads. Registration penalties or revoked status are not automatically corruption.
 
 The supplied Ontario source candidates are not a complete approved background-check service. Until mandatory channels are validated, real cases cannot silently pass that gate. Clearly synthetic test cases can still demonstrate how the rules work.
 
@@ -104,11 +104,21 @@ Feedback has three paths: apply current-session preferences; check factual corre
 
 Models cannot directly change authoritative amounts or qualification. Each integration needs a real useful request and evidence that the application used the result. Installing a library or writing a prompt is not proof of integration.
 
-## R13 Limited credits
+### How the agents work together
 
-Use code and templates where possible. Make at most one model extraction call per review by default, only when needed. Follow-up questions first use existing facts; one bounded model call is allowed if necessary and within budget.
+Six roles share the case record: coordination, identity/risk research, medical-need research, funding/channel research, evidence evaluation and dispute resolution. Only needed roles run. They may use the same model, code or tools; six roles do not mean six model calls.
 
-Reuse valid results, prevent duplicate requests and set time/call/token limits. No automatic paid retries, silent provider replacement or unlimited generation. Actual remaining credit is provided by the account holder, not guessed. More credit can fund more coverage and supported media, but cannot replace source permissions or evidence.
+The evaluator challenges findings and identifies an exact problem. The coordinator changes the plan; the dispute resolver and relevant researcher look for evidence that could resolve it. Then the evidence is checked again. For example, an unclear grant inclusion triggers a targeted funding check, not another full organization review.
+
+Complete evidence goes straight to the rule checks. Missing evidence can end as pending. Repeated unsuccessful actions stop at configured limits. New public information can reopen the affected checks. Money and recommendation rules remain enforced by code.
+
+## R13 Efficient use and demo budget
+
+**Current low-credit demo only:** use at most one model extraction call per review, one bounded follow-up call if needed, and one targeted repair round within the same review allowance. These are temporary demo settings, not permanent product limits. Do not spend more without the account owner's authorization.
+
+**Production:** use a separate service-managed budget profile. Allow enough bounded research, extraction and repair to produce a useful, properly checked result; do not inherit the demo's one-call limit. Keep costs low through shared validated evidence, suitable models, code, templates, caching and duplicate-request prevention. Users should not need to manage API keys, tokens or repeated credit top-ups to receive an ordinary supported result. Pricing and who funds the service are separate business decisions; no free or unlimited service is promised.
+
+Both profiles need configured cost, time and retry limits, truthful usage records and clear partial results when work cannot finish. No endless loops or silent provider replacement. Production retries may be enabled only by an explicit bounded policy that accounts for possible billing and avoids duplicate work. Determine an ordinary-use cost and latency target, then measure representative successful and incomplete cases before claiming the service is affordable. More budget cannot replace source permissions or evidence.
 
 ## R14 Failures and visibility
 
@@ -126,11 +136,20 @@ The running agent cannot buy services, install tools, create accounts, change po
 
 The product policy owner approves scope, gates and policy changes. Account/resource holders authorize credentials and spending. Developers solve implementation problems. Authorized business reviewers handle evidence disputes and restoration after risk holds; they are not automatically the developers.
 
-If no business reviewer is available, the case stays pending. A simple queue is enough for version 1. A simulated reviewer in a demo must be identified as simulated.
+Ordinary missing documents, uncertain totals and tool failures do not need a human: return pending with specific gaps. A dispute-resolution agent first investigates conflicts. Escalate only a confirmed relevant unresolved investigation, a material high-credibility conflict still unresolved after bounded checks, restoration of an established risk hold, or a policy exception/appeal/change. A policy decision belongs to the policy owner. If no required reviewer is available, the case stays pending or held. A simple queue is enough for version 1. A simulated reviewer in a demo must be identified as simulated.
 
 ## R17 What a working demo must show
 
-Use one case to demonstrate: a supporter finding a result; an organization receiving a gap list; a public update changing the relevant checks using recalled memory; and a requested backend view showing actual tool work/failures/usage.
+Confirmed demo completion contract: use one case to demonstrate all six items below.
+
+1. A supporter receives full organization/case information, need evidence, a justified disclosed funding gap when calculable, and explicit unknowns. If none qualify, show pending cases honestly.
+2. An organization provides public links and receives specific evidence gaps and suggested improvements; no private uploads.
+3. Evidence changes agent actions: sufficient facts skip extra work; a conflict triggers targeted investigation; an unresolved gap stops without forced approval.
+4. A public update triggers real memory recall, re-reading and affected-check revalidation, preserving historical versions.
+5. NVIDIA, H-MEM, Nightshift and Zetaris each have separate actual request/result/consumption records for any integration claimed complete. Unconnected or simulated components are labelled and remain incomplete.
+6. An on-request backend view shows plan changes, failure stages, available usage and stop reasons; default user output shows sources and relevant limitations.
+
+Also demonstrate three different paths: sufficient evidence skips extra work; a conflict triggers targeted investigation and a revised result; an unresolved gap stops honestly at its limit. The trace must show why the actions changed.
 
 Use real permitted information where it suffices. If the real case cannot meet every requirement, show that honestly and use labelled synthetic cases to test the full pass path. Passing synthetic tests proves mechanics, not real-world verification. Run the acceptance checks; do not call them passed merely because they are written down.
 

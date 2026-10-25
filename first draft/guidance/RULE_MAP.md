@@ -17,12 +17,12 @@ Acceptance IDs refer to rows in ACCEPTANCE_CASES.md. They are requirements, not 
 | R09 Risk channels | [Risk](HUMAN_GUIDE.md#r09-organization-risk) | [13 Risk](FULL_GUIDANCE.md#13-organization-risk-and-applicable-channels) | R01–R12 |
 | R10 Freshness and updates | [Updates](HUMAN_GUIDE.md#r10-freshness-and-updates) | [11 Freshness](FULL_GUIDANCE.md#11-freshness-and-policy-configuration), [12 Updates](FULL_GUIDANCE.md#12-updates-caching-and-current-judgments) | H01–H16 |
 | R11 Memory and history | [Memory](HUMAN_GUIDE.md#r11-memory-and-history) | [14 Feedback/memory](FULL_GUIDANCE.md#14-feedback-and-memory), [21 History](FULL_GUIDANCE.md#21-history-queries) | H12–H19, M19–M20 |
-| R12 Tools and model authority | [Tools](HUMAN_GUIDE.md#r12-what-the-tools-do) | [16 Orchestration](FULL_GUIDANCE.md#16-orchestrator-workflow), [17 Models](FULL_GUIDANCE.md#17-model-responsibility-and-output-checks), [19 Adapters](FULL_GUIDANCE.md#19-adapter-contracts-and-connection-acceptance) | M04–M08, M15–M23 |
-| R13 Credit and execution limits | [Credits](HUMAN_GUIDE.md#r13-limited-credits) | [18 Budgets](FULL_GUIDANCE.md#18-low-credit-operation) | M01–M03, M08–M13 |
-| R14 Failures and trace | [Failures](HUMAN_GUIDE.md#r14-failures-and-visibility) | [20 Visibility](FULL_GUIDANCE.md#20-internal-review-user-visibility-and-run-records) | O05–O07, H09–H10 |
+| R12 Tools and model authority | [Tools](HUMAN_GUIDE.md#r12-what-the-tools-do) | [16 Orchestration](FULL_GUIDANCE.md#16-evidence-driven-agent-system), [17 Models](FULL_GUIDANCE.md#17-model-responsibility-and-output-checks), [19 Adapters](FULL_GUIDANCE.md#19-adapter-contracts-and-connection-acceptance) | M04–M08, M15–M23, A01–A16 |
+| R13 Credit and execution limits | [Credits](HUMAN_GUIDE.md#r13-efficient-use-and-demo-budget) | [18 Budgets](FULL_GUIDANCE.md#18-efficient-operation-and-budget-profiles) | M01–M03, M08–M13 |
+| R14 Failures and trace | [Failures](HUMAN_GUIDE.md#r14-failures-and-visibility) | [20 Visibility](FULL_GUIDANCE.md#20-internal-review-user-visibility-and-run-records) | O05–O07, H09–H10, A11–A16 |
 | R15 Permissions | [Permissions](HUMAN_GUIDE.md#r15-permissions-and-payments) | [10 Payments](FULL_GUIDANCE.md#10-no-payment-functionality), [15 Permissions](FULL_GUIDANCE.md#15-autonomous-permissions) | G18–G19, O08–O10 |
-| R16 Human roles | [Responsibility](HUMAN_GUIDE.md#r16-human-responsibility) | [22 Business review](FULL_GUIDANCE.md#22-business-review-queue), [25 Handover](FULL_GUIDANCE.md#25-implementation-roles-and-handover) | R11–R12 |
-| R17 Delivery evidence | [Working demo](HUMAN_GUIDE.md#r17-what-a-working-demo-must-show) | [26 Acceptance](FULL_GUIDANCE.md#26-acceptance-and-demonstration), [27 Inventory](FULL_GUIDANCE.md#27-implementation-inventory-and-delivery-evidence) | All cases plus recorded minimum demonstration |
+| R16 Human roles | [Responsibility](HUMAN_GUIDE.md#r16-human-responsibility) | [22 Business review](FULL_GUIDANCE.md#22-business-review-queue), [25 Handover](FULL_GUIDANCE.md#25-implementation-roles-and-handover) | R11–R12, A07–A10 |
+| R17 Delivery evidence | [Working demo](HUMAN_GUIDE.md#r17-what-a-working-demo-must-show) | [26 Acceptance](FULL_GUIDANCE.md#26-acceptance-and-demonstration), [27 Inventory](FULL_GUIDANCE.md#27-implementation-inventory-and-delivery-evidence) | All cases, especially A01–A16, plus recorded minimum demonstration |
 
 ## Authority order
 

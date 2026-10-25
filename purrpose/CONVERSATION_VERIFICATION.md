@@ -1,0 +1,9 @@
+# Conversation verification
+
+24 October 2026. Basic conversation uses explicit intent patterns in `conversation.py`, not a model. `/api/chat` is subject to the existing loopback, origin, body-size and operation guards. Session IDs and messages are bounded; at most 100 in-process sessions. New chat selects a fresh browser session ID. Old session state lasts until server restart; no donor preferences are written to H-MEM. Session IDs are not production authentication.
+
+Supported English/Chinese requests: greeting, cat discovery, Ottawa/Toronto/anywhere in Ontario, consent to requested expansion, and active-case evidence/gap/amount/latest queries. Responses re-evaluate the current shared synthetic case. “Latest” explicitly means current fixture state, not new website retrieval. Unsupported, ambiguous and recognized negated requests ask for clarification. This is not comprehensive language understanding or comprehensive prompt-injection detection; input has no arbitrary execution/tool authority.
+
+Actual checks: 112 tests passed with official local H-MEM reference configured; browser discovery, city, Chinese follow-up, context reset, mobile overflow and JavaScript-error checks passed. Nine new conversation tests exercise current-state changes/outages, scope separation, expansion consent, input limits, unsupported requests and policy/payment rejection. No new paid inference, SQL query or external source fetch. Existing source and qualification limitations remain unchanged. The synthetic case is not a real rescue recommendation.
+
+Natural phrasing regression: 118 application tests passed with real H-MEM reference configured, including the exact screenshot phrase and preference handling. Browser conversation/reset/mobile checks also passed. chat_intent.py is an inactive validation boundary, not a connected chat model. No new cloud requests. General model integration awaits configured provider and separately authorized shared budget.
