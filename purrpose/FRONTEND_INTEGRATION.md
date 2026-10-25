@@ -30,13 +30,13 @@ All POST requests require JSON Content-Type, `X-Purrpose-Local: 1`, own origin, 
 
 | Method and route | Client method | JSON request | Main response |
 |---|---|---|---|
-| GET /api/status | status() | none | mode, memory, nightshift, cloud_inference_in_this_server, public_web_fetching, payments, public_fixture_link, limitation |
+| GET /api/status | status() | none | mode, memory, nightshift, cloud_inference_in_this_server, model_provider (null when off: route, model, ready, config_error, connection, budget), public_web_fetching, payments, public_fixture_link, limitation |
 | POST /api/supporter | supporter(preferences) | city:string/null, region_wide:boolean, allow_expansion:boolean; all optional | status=needs_preference/no_city_match/results |
 | POST /api/organization | organization(publicLinks) | public_links: nonempty string array | status=gap_review/unsupported_links |
-| POST /api/chat | chat(sessionId,message) | session_id:1–80 ASCII letters/digits/hyphens; message:1–1500 nonblank characters | reply, mode, new_cloud_calls, optional results |
+| POST /api/chat | chat(sessionId,message) | session_id:1–80 ASCII letters/digits/hyphens; message:1–1500 nonblank characters | reply, mode (bounded_intent_matching or model_intent_validated), new_cloud_calls (0 or 1), optional model_intent (route, model, prompt_version, status used/cached/failed/invalid_output, intent, error_category), optional results |
 | POST /api/history | history(cutoff) | cutoff:null or ISO datetime with timezone | status=recorded_review/partial_legacy_record/history_unavailable |
 | POST /api/update | demoUpdate(action,requestId) | action:clarify/more_funds/fully_funded/source_outage; request_id:1–100 characters | status, optional review, update_events, idempotent_replay |
-| POST /api/debug | debug() | {} | latest_run, update_events, new_cloud_calls |
+| POST /api/debug | debug() | {} | latest_run, update_events, model_trace (sanitized: no keys, message text or reasoning), new_cloud_calls |
 
 Update and debug are **demo/developer controls**, not normal donor features. `/api/update` changes a synthetic funding source; it does not accept real organization updates. Source notifications exist as a backend fixture capability, not an arbitrary public URL fetch endpoint.
 
@@ -106,7 +106,7 @@ Run `node purrpose/test_api_client.cjs` for client mapping/error/timeout/no-retr
 
 ## Honest integration status
 
-Local Python review and selected actual H-MEM memory operations work. Real Lucy observations and a separate synthetic case are both available; real qualification remains pending. NVIDIA had one real extraction test plus a recorded replay; the web app does not call NVIDIA. Zetaris historical identity was queried separately; it is not wired into current case cards. Nightshift remains unconnected. General model conversation, arbitrary URL retrieval, approved current regional risk coverage and production deployment remain incomplete; only two fixed real articles can be retrieved. Existing API credentials do not authorize new spending.
+Local Python review and selected actual H-MEM memory operations work. Real Lucy observations and a separate synthetic case are both available; real qualification remains pending. NVIDIA had one real extraction test plus a recorded replay. Separately, when a chat model is configured, every ordinary chat message makes at most one bounded intent-classification call (direct NVIDIA tested); the reply, amounts and status are still written by code. Show `model_intent` honestly and never claim zero model calls when `new_cloud_calls` is 1. Zetaris historical identity was queried separately; it is not wired into current case cards. Nightshift remains unconnected (direct NVIDIA calls are not Nightshift use). General model-written conversation, arbitrary URL retrieval, approved current regional risk coverage and production deployment remain incomplete; only two fixed real articles can be retrieved. Existing API credentials do not authorize new spending.
 
 ### Saved research assessment route
 

@@ -1,6 +1,6 @@
 # Purrpose local application
 
-A working local demo for evidence-based animal-rescue discovery and public-information gap review. It contains **one real pending lead** (Lucy and her kittens) and a **separate fictional workflow**. General conversational AI and Nightshift are not connected. No payment functions.
+A working local demo for evidence-based animal-rescue discovery and public-information gap review. It contains **one real pending lead** (Lucy and her kittens) and a **separate fictional workflow**. Nightshift is not connected. An optional chat model (direct NVIDIA or Meterless Runtime, explicitly configured) can classify chat intent; code still writes every answer. No payment functions.
 
 ## Start on your computer
 
@@ -21,6 +21,16 @@ python -m purrpose.server --reference /absolute/path/to/Meterless/engines/hmem/r
 ```
 
 Use your own configured absolute reference path. No developer-specific paths or credentials are assumed. The tested external reference revision is1742dec56a66e58eef9dda2d2b865823758ca8cd. Source: https://github.com/Meterless/Meterless/tree/1742dec56a66e58eef9dda2d2b865823758ca8cd/engines/hmem/reference . It is not vendored or installed automatically. See MEMORY_VERIFICATION.md. Restart resets fixture source contents, chat, feedback and recent-read cache; H-MEM history persists in its configured workspace. Use a new workspace for an isolated demonstration, never delete old state just to reset a demo.
+
+## Optional chat model
+
+Copy `.env.example` to `.env.local` (git-ignored), add your own NVIDIA key and keep or change the caps, then start with:
+
+```text
+python -m purrpose.server --env-file .env.local
+```
+
+Environment variables work too. With `PURRPOSE_MODEL_PROVIDER` set, every ordinary chat message is classified by the configured model; a validator checks the intent and the existing code writes the reply. Safety refusals, negations, two-city requests and explicit `refresh Lucy` stay code-only. Missing caps block model calls; failures and invalid output fall back to bounded matching, labelled in the response. There are no retries and no automatic switch between providers. `nvidia_direct` is not Nightshift use; the `meterless` route follows the provider contract but has not been tested against a running runtime. See MODEL_PROVIDER_VERIFICATION.md.
 
 ## Try the real donor journey
 
@@ -48,9 +58,9 @@ Feedback distinguishes session-only city preference, unverified Lucy correction 
 
 - Official local H-MEM: sourced review save/recall/history, including the real pending path when configured.
 - Public retrieval: only two fixed Lucy articles; rule-based candidate extraction with source quotes and date conversion. Not general model reasoning or clinical authenticity verification.
-- NVIDIA: one separately authorized real extraction (281tokens) and validated replay; ordinary page operations do not call it. Its spending allowance is exhausted.
+- NVIDIA: one separately authorized real extraction (281tokens) and validated replay; that allowance is exhausted. Separately, the optional chat-intent provider made live direct NVIDIA calls on the account owner's own key under owner-approved caps (MODEL_PROVIDER_VERIFICATION.md). Without configuration, page operations do not call NVIDIA.
 - Zetaris: separate read-only historical identity query succeeded; current Lucy case is not connected through Zetaris.
-- Nightshift: deferred and unconnected. No new provider credit or runtime assumed.
+- Nightshift: unconnected. A Meterless Runtime provider adapter exists but no runtime has been reachable, so it is untested. Direct NVIDIA calls are not Nightshift use.
 - No current real six-gate qualification, production hosting/authentication/concurrency, full regional risk coverage or general web discovery.
 
 ## Validation

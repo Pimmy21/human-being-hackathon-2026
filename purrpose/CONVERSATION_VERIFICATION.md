@@ -1,5 +1,7 @@
 # Conversation verification
 
+> **Update 25 Oct 2026:** with `PURRPOSE_MODEL_PROVIDER` configured, every ordinary chat message is now classified by an explicitly configured model (direct NVIDIA tested; Meterless route untested) and validated before code writes the reply. Without configuration the behaviour below is unchanged. See MODEL_PROVIDER_VERIFICATION.md.
+
 24 October 2026. Basic conversation uses explicit intent patterns in `conversation.py`, not a model. `/api/chat` is subject to the existing loopback, origin, body-size and operation guards. Session IDs and messages are bounded; at most 100 in-process sessions. New chat selects a fresh browser session ID. Old session state lasts until server restart; no donor preferences are written to H-MEM. Session IDs are not production authentication.
 
 Supported English/Chinese requests: greeting, cat discovery, Ottawa/Toronto/anywhere in Ontario, consent to requested expansion, and active-case evidence/gap/amount/latest queries. Responses re-evaluate the current shared synthetic case. “Latest” explicitly means current fixture state, not new website retrieval. Unsupported, ambiguous and recognized negated requests ask for clarification. This is not comprehensive language understanding or comprehensive prompt-injection detection; input has no arbitrary execution/tool authority.
