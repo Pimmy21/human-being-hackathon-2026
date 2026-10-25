@@ -17,7 +17,8 @@ No keys or GPU are needed to try the basic pages. H-MEM requires Node 24 and an 
 - Real donor path: one curated Lucy lead, sourced pending findings, unknown remaining amount, explicit bounded article refresh and conditional review; official H-MEM save/recall/history when configured.
 - Separate synthetic funding repair and history scenario, and an entirely fictional organization website-improvement walkthrough.
 - Feedback categories, source failure states, local debug traces and portable setup documentation.
-- Sponsor status is factual: H-MEM used; one NVIDIA test/replay; one separate historical Zetaris query; Nightshift deferred/unconnected. No new paid requests authorized.
+- Sponsor status is factual: H-MEM used; one NVIDIA test/replay; one separate historical Zetaris query; Nightshift deferred/unconnected. No new paid requests authorized by this handoff.
+- Optional chat model (25 Oct): with `PURRPOSE_MODEL_PROVIDER` set, every ordinary chat message is classified by a configured model and validated in `chat_intent.py` before code replies (`provider.py`, `model_intent.py`). Live direct NVIDIA was tested on the account owner's own key and caps; direct NVIDIA is not Nightshift, and the Meterless route is untested. The unified dual-intent work below can extend this intent set. See `purrpose/MODEL_PROVIDER_VERIFICATION.md`.
 
 ## Next agreed priority: one conversation entry
 The product owner confirmed that supporter and organization are intents, not mutually exclusive user types. Use one chat entry. Examples:

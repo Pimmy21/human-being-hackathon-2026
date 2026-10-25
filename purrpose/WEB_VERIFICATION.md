@@ -1,5 +1,7 @@
 # Local browser and API verification
 
+> **Update 25 Oct 2026:** with `PURRPOSE_MODEL_PROVIDER` configured, every ordinary chat message is now classified by an explicitly configured model (direct NVIDIA tested; Meterless route untested) and validated before code writes the reply. Without configuration the behaviour below is unchanged. See MODEL_PROVIDER_VERIFICATION.md.
+
 24 October 2026. Python 3.12.14, Node 24.18.0, Windows Chrome. Local uncommitted working tree; no upload/public deployment or new external model request.
 
 ## Actually executed

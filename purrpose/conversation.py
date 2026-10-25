@@ -1,14 +1,52 @@
-"""Bounded bilingual intent matching, not a model or general natural-language planner."""
+"""Bilingual chat: optional validated model intent, then bounded code matching.
+
+With a configured model, every ordinary message is classified by the model;
+the validated intent becomes a canonical phrase and code writes the reply.
+Safety refusals, negations, two-city ambiguity and explicit source refreshes
+stay code-only. Without a model, or when it fails, bounded matching is used
+and labelled as such.
+"""
 import re
 from .journeys import public_record
 from .research_case import assess_saved_research
 from .organization_research import organization_research, LINKS as REAL_LINKS
+from .model_intent import ModelIntent
+
+GUARDS = ('ignore instructions', 'ignore previous', '忽略规则', '转账', 'pay for me', 'donate for me', '替我捐')
+NEGATIONS = ("don't", 'do not', 'not ottawa', 'not toronto', '不要', '不想', '不是')
+REFRESH = ('refresh', 'recheck website', 'check website again', '重新检查官网', '重新读取', '刷新官网')
+FICTIONAL = ('synthetic', 'fictional', '虚构', '模拟')  # Only literal words may switch to fictional cases.
+CITY_WORDS =(('Ottawa', ('ottawa', '渥太华')), ('Toronto', ('toronto', '多伦多')))
+CANONICAL = {'greet': 'hello', 'amount': 'how much', 'allocation': 'allocation', 'evidence': 'evidence',
+             'gaps': 'missing', 'select_real_case': 'lucy', 'history': 'lucy history',
+             'organization_checklist': 'lucy organization checklist', 'confirm_expansion': 'yes'}
+
+
+def canonical(proposal):
+    """Phrase the bounded matcher already handles for a validated model intent."""
+    name, city = proposal['intent'], proposal['city']
+    if name in CANONICAL:
+        return CANONICAL[name]
+    place = 'find a cat in '+city.lower() if city else (
+        'find a cat anywhere in ontario' if proposal['region_wide'] else 'i want to help a cat')
+    return ('fictional ' if name == 'fictional_demo' else '')+place
+
+
+def code_only(text):
+    both_cities = all(any(w in text for w in words) for _, words in CITY_WORDS)
+    return any(any(w in text for w in group) for group in (GUARDS, NEGATIONS, REFRESH)) or both_cities
+
+
+def model_context(state, offer_ontario=False):
+    return {'awaiting_expansion_answer': bool(state['expand'] or offer_ontario), 'real_case_selected': bool(state.get('research')),
+            'fictional_mode': state.get('collection') == 'synthetic', 'fictional_case_active': bool(state['active'])}
 
 
 class Conversation:
-    def __init__(self, app):
+    def __init__(self, app, model=None):
         self.app = app
         self.sessions = {}
+        self.model = ModelIntent(model) if model else None
 
     def reply(self, session_id, message):
         if (not isinstance(session_id, str) or not re.fullmatch(r'[A-Za-z0-9-]{1,80}', session_id)
@@ -21,27 +59,60 @@ class Conversation:
         state = self.sessions[session_id]
         text = message.strip().casefold()
         zh = bool(re.search(r'[\u4e00-\u9fff]', text))
+        offer_ontario = state.pop('offer_ontario', False)  # An Ontario offer lasts for one reply only.
+        if self.model is None or code_only(text):
+            return self.match(state, text, zh)
+        proposal, info = self.model.propose(message.strip(), model_context(state, offer_ontario))
+        meta = {'model_intent': info, 'new_cloud_calls': info['new_cloud_calls']}
+        if proposal is None:
+            return self.match(state, text, zh, meta)  # Labelled bounded-matching fallback.
+        if proposal['intent'] == 'outside_area':
+            state['offer_ontario'] = True
+            return {'reply': ('Purrpose 目前只覆盖安省，无法在那里查找。要看安省范围内的线索吗？' if zh else
+                              'Purrpose only covers Ontario for now, so it cannot search there. Would you like to see leads anywhere in Ontario?'),
+                    'mode': 'model_intent_validated', **meta}
+        if proposal['intent'] == 'fictional_demo' and not any(w in text for w in FICTIONAL):
+            # Like source refreshes, switching to made-up cases needs the user's explicit words.
+            return {'reply': ('你想看安省的真实线索，还是虚构演示案例？请说“安省都可以”或“虚构演示”。' if zh else
+                              'Do you want real Ontario leads or the fictional demo case? Say "anywhere in Ontario" for real leads, or "fictional demo" for the made-up example.'),
+                    'mode': 'model_intent_validated', **meta}
+        if proposal['intent'] == 'confirm_expansion' and offer_ontario:
+            return self.match(state, 'find a cat anywhere in ontario', zh, meta, 'model_intent_validated')
+        if proposal['intent'] == 'clarify':
+            return {'reply': ('能再具体一点吗？我可以帮你找想支持的小猫（渥太华、多伦多或安省都可以），或解释案例的证据、金额和来源。'
+                              if zh else "Could you say a bit more? I can help you find a cat to support (Ottawa, Toronto or anywhere in Ontario), or explain a case's evidence, amounts and sources."),
+                    'mode': 'model_intent_validated', **meta}
+        if proposal['intent'] == 'organization_checklist' and not state.get('research'):
+            # A stated rescue role is not identity, and must not open another organization's case.
+            return {'reply': ('这个原型只评估已配置的 Lucy 公开页面，不会审查你的机构，自称的身份也不代表已核实。'
+                              '请打开“For rescues”机构演示，或说“Lucy organization checklist”查看示例清单。' if zh else
+                              'This prototype only assesses the configured Lucy public pages, so it has not reviewed your '
+                              'organization, and saying you run a rescue does not verify who you are. Open the "For rescues" '
+                              'walkthrough, or say "Lucy organization checklist" to see an example checklist.'),
+                    'mode': 'model_intent_validated', **meta}
+        return self.match(state, canonical(proposal), zh, meta, 'model_intent_validated')
+
+    def match(self, state, text, zh, meta=None, mode='bounded_intent_matching'):
         def response(en, cn, **extra):
-            return {'reply': cn if zh else en, 'mode': 'bounded_intent_matching',
-                    'new_cloud_calls': 0, **extra}
-        if any(x in text for x in ('ignore instructions', 'ignore previous', '忽略规则', '转账', 'pay for me', 'donate for me', '替我捐')):
+            return {'reply': cn if zh else en, 'mode': mode, 'new_cloud_calls': 0, **(meta or {}), **extra}
+        if any(x in text for x in GUARDS):
             return response('I can explain public evidence, but cannot change verification rules or handle payments.',
                             '我可以解释公开证据，但不能修改核查规则或代收、代付捐款。')
         if text in ('hi', 'hello', 'hey', '你好', '您好'):
             return response('Hi! I can help find a case, explain missing evidence, amounts and sources. Which Ontario city, or anywhere in Ontario?',
                             '你好！我可以帮你找案例，解释缺失证据、金额和来源。想看安省哪个城市，还是安省都可以？')
-        if any(w in text for w in ("don't", 'do not', 'not ottawa', 'not toronto', '不要', '不想', '不是')):
+        if any(w in text for w in NEGATIONS):
             return response('Please state the city you do want, or say “anywhere in Ontario”. I have not changed your selection.',
                             '请直接告诉我你想看的城市，或说“安省都可以”。我没有更改选择。')
         select_research = any(w in text for w in ('lucy', 'real case', '真实案例'))
-        if any(w in text for w in ('synthetic', 'fictional', '虚构', '模拟')):
+        if any(w in text for w in FICTIONAL):
             state.update(collection='synthetic', research=False, active=False, expand=False)
             state.pop('last_live_read', None)
         if select_research:
             state['collection'] = 'real'
         research_history = any(w in text for w in ('history', '历史记录', '审查记录'))
         organization_request = any(w in text for w in ('organization checklist', 'our rescue', 'as a rescue', '我们的机构', '机构需要补', '组织要补'))
-        refresh = any(w in text for w in ('refresh', 'recheck website', 'check website again', '重新检查官网', '重新读取', '刷新官网'))
+        refresh = any(w in text for w in REFRESH)
         research_question = any(w in text for w in ('how much', 'remaining', '还缺', '多少钱', 'allocation', '分配', '用途', 'money', '查到', 'found', 'verified', 'trust', '可信', 'missing', '缺', 'source', '来源', 'evidence', '证据', '登记', 'registered', 'latest', '最新', '补充', 'provide'))
         if select_research or (state.get('research') and (research_question or refresh or research_history or organization_request)):
             state.update(research=True, active=False, expand=False)

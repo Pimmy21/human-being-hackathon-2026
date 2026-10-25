@@ -57,7 +57,7 @@ async function submit(raw){
    if(!known.includes(message)){render({reply:'This prototype supports only the configured Lucy articles. This URL was not fetched. Try “I want to help a cat” or use the example request.'});notice.textContent='Unsupported URL; no source was fetched.';return;}
    query='Tell me about Lucy';
   }
-  const result=await api.chat(session,query);render(result);box.value='';notice.textContent='No payment or new cloud-model call. Source refresh happens only when explicitly requested.';
+  const result=await api.chat(session,query);render(result);box.value='';const mi=result.model_intent;notice.textContent=(result.new_cloud_calls?`A configured model (${mi&&mi.route}) classified this message; code wrote the answer. `:mi&&mi.status==='cached'?'Reused an earlier model classification; no new cloud-model call. ':'No new cloud-model call. ')+'No payment. Source refresh happens only when explicitly requested.';
  }catch(error){notice.textContent=error.code==='timeout_result_unknown'?'The result is uncertain after a timeout. Backend work may still be running; do not automatically retry.':'The request did not complete. No new result is confirmed.';box.value=message;}
  finally{busy=false;for(const b of document.querySelectorAll('.chip,.results button'))b.disabled=false;sync();}
 }

@@ -50,8 +50,8 @@ The synthetic engine implements a limited grant-inclusion repair, not arbitrary 
 | Component | What we can show honestly | Still missing |
 |---|---|---|
 | Meterless H-MEM | Official local reference stores/recalls synthetic case reviews and historical states | Real Lucy dossier ingestion and production memory hardening |
-| Nightshift | Required/planned provider route | Not connected; Windows/Web runtime setup awaits clarification |
-| NVIDIA | One separately authorized real text extraction and validated replay,281tokens | No new budget; no live conversational model; no video analysis |
+| Nightshift | Required/planned provider route; a Meterless Runtime adapter exists (contract headers, /v1/models discovery) | No reachable runtime, so untested; direct NVIDIA calls do not count |
+| NVIDIA | One separately authorized real text extraction and validated replay,281tokens; when configured, live direct-NVIDIA chat intent classification under owner-set caps on the account owner's key | Model only classifies intent, never writes answers; no video analysis |
 | Zetaris | Separate successful read-only query of an existing historical2024 identity table | Current Lucy identity/case data not wired through Zetaris |
 | Source retrieval | Two live organization articles with bounds, errors and sourced narrow candidates | General discovery, current registry automation, clinical/funding/risk coverage |
 | Coding assistants | Implement and test the application | They are development tools, not hidden runtime agents |

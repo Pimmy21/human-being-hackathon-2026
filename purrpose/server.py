@@ -1,6 +1,7 @@
-"""Local functional demo. Serial requests, fixture sources, no cloud calls."""
+"""Local functional demo. Serial requests, fixture sources; cloud model calls only when explicitly configured."""
 import argparse
 from copy import deepcopy
+import os
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 import time
@@ -19,6 +20,7 @@ from .real_review import review_real_observations, CASE_ID as REAL_CASE_ID
 from .organization_research import organization_research, LINKS as REAL_LINKS
 from .real_discovery import discover_real
 from .feedback import Feedback
+from .provider import from_settings, read_settings
 
 PUBLIC_LINK = 'https://example.invalid/purrpose/maple'
 FUNDING_LINK = PUBLIC_LINK+'/funding'
@@ -26,8 +28,9 @@ WEB = Path(__file__).with_name('web')
 
 
 class LocalApp:
-    def __init__(self, memory=None):
+    def __init__(self, memory=None, model=None):
         self.memory = memory
+        self.model = model
         case = load_scenario('exhausted')
         case['public_links'] = [PUBLIC_LINK, FUNDING_LINK]
         self.pending_source = deepcopy(case['sources']['funding'])
@@ -35,7 +38,7 @@ class LocalApp:
         self.service = UpdateService(case, self.read_fixture, {FUNDING_LINK: 'funding'}, memory)
         self.latest_run = None
         self.requests = {}
-        self.conversation = Conversation(self)
+        self.conversation = Conversation(self, model)
         self.feedback = Feedback(self.conversation)
         self.public_read_cache = None
         self.public_read_at = 0
@@ -51,7 +54,9 @@ class LocalApp:
                 'source_review_date_scope': 'frozen_synthetic_fixture_only',
                 'default_ui_discovery': 'real_curated', 'runtime_roles': 'deterministic_code',
                 'memory': 'real_local_reference_configured' if self.memory else 'not_configured',
-                'nightshift': 'not_connected', 'cloud_inference_in_this_server': False,
+                'nightshift': self.model.status()['nightshift'] if self.model else 'not_connected',
+                'cloud_inference_in_this_server': bool(self.model and self.model.ready),
+                'model_provider': self.model.status() if self.model else None,
                 'public_web_fetching': 'two_fixed_articles_only', 'payments': False,
                 'public_fixture_link': PUBLIC_LINK,
                 'limitation': 'Restart resets simulated source contents; configured H-MEM history remains.'}
@@ -122,6 +127,7 @@ class LocalApp:
             return history_from_memory(self.memory, self.service.case['case_id'], data.get('cutoff'))
         if path == '/api/debug':
             return {'latest_run': self.latest_run, 'real_latest_run': self.real_latest_run, 'update_events': deepcopy(self.service.events),
+                    'model_trace': deepcopy(getattr(self.model, 'trace', [])),
                     'new_cloud_calls': 0, 'scope': 'Explicit local demo debug view; not production authorization.'}
         action, request_id = data.get('action'), data.get('request_id')
         if action not in ('clarify', 'more_funds', 'fully_funded', 'source_outage'):
@@ -217,19 +223,26 @@ def handler_for(app):
 
 
 def main():
-    p = argparse.ArgumentParser(description='Local-only Purrpose functional demo; no paid endpoints')
+    p = argparse.ArgumentParser(description='Local-only Purrpose functional demo; model calls only when explicitly configured')
     p.add_argument('--port', type=int, default=8766)
     p.add_argument('--reference', type=Path)
     p.add_argument('--state', type=Path)
     p.add_argument('--workspace', default='local-ui')
+    p.add_argument('--env-file', type=Path, help='Local file with PURRPOSE_MODEL_* settings (never committed)')
     args = p.parse_args()
     if bool(args.reference) != bool(args.state):
         p.error('Supply both reference and state')
     memory = HMem(args.reference, args.state, workspace=args.workspace) if args.reference else None
-    app = LocalApp(memory)
+    model = from_settings(read_settings(args.env_file, os.environ))
+    app = LocalApp(memory, model)
     # Deliberately serial: the demo H-MEM file store has no concurrent-write guarantee.
     server = HTTPServer(('127.0.0.1', args.port), handler_for(app))
     print('Purrpose local demo: http://127.0.0.1:'+str(server.server_address[1]), flush=True)
+    if model:
+        status = model.status()
+        print('Chat model:', status['route'], status['model'], 'ready' if model.ready else 'blocked: '+status['config_error'], flush=True)
+        if status['route'] == 'meterless' and model.ready:
+            print('Meterless discovery:', model.probe()['connection'], flush=True)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
