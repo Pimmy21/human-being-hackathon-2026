@@ -77,3 +77,50 @@ class RealResearchChatTests(TestCase):
         self.assertEqual(result['results']['collection'],'real')
         self.assertEqual(result['results']['status'],'no_city_match')
         self.assertIsNone(self.app.latest_run)
+
+    def test_refresh_reports_run_and_cached_read_does_not(self):
+        with patch('purrpose.server.bounded_read',return_value={'status':'read_complete','sources':[]}):
+            first=self.say('refresh Lucy')
+            self.assertIsNotNone(first['agent_run']['run_id'])
+            self.assertEqual(first['agent_run']['note'],'New review run')
+            self.assertEqual(first['live_read']['run_id'],first['agent_run']['run_id'])
+            second=self.say('refresh Lucy')
+            self.assertIsNone(second['agent_run']['run_id'])
+            self.assertEqual(second['agent_run']['note'],'Reused a recent source read; no new run')
+            self.assertEqual(len(self.app.runs.summaries()),1)
+            summary=self.app.runs.summaries()[0]
+            self.assertEqual(summary['kind'],'real')
+            self.assertEqual(summary['session_label'],'one')
+
+    def test_plain_follow_up_has_no_run(self):
+        self.say('Lucy')
+        answer=self.say('Lucy what evidence is missing?')
+        self.assertEqual(answer['agent_run'],{'run_id':None,'note':'Answered from saved results; no agents ran','model':None})
+        self.assertEqual(self.app.runs.summaries(),[])
+
+    def test_fictional_chat_answer_reports_fictional_run(self):
+        self.say('fictional Ottawa')
+        answer=self.say('How much?')
+        self.assertEqual(answer['agent_run']['note'],'New review run')
+        run=self.app.runs.get(answer['agent_run']['run_id'])
+        self.assertEqual(run['kind'],'fictional')
+
+    def test_failed_read_still_records_run_with_tool_row(self):
+        with patch('purrpose.server.bounded_read',return_value={'status':'read_incomplete','sources':[],'stage':'robots','error':'network_or_timeout'}):
+            answer=self.say('refresh Lucy')
+        run=self.app.runs.get(answer['agent_run']['run_id'])
+        self.assertEqual(run['tools'][0]['status'],'not_configured')
+        self.assertEqual(run['status'],'source_check_incomplete')
+
+    def test_review_panel_fixture_matches_backend_shape(self):
+        import json
+        from pathlib import Path
+        samples=json.loads((Path(__file__).parent/'fixtures'/'chat-samples.json').read_text(encoding='utf-8'))
+        live=self.say('Tell me about Lucy')
+        self.assertEqual(set(samples['lucy']['research']),set(live['research']))
+        self.assertEqual(set(samples['organization']['organization_review']),
+                         set(self.say('Lucy organization checklist')['organization_review']))
+        self.say('fictional Ottawa','two')
+        fictional=self.say('fictional Ottawa','two')['results']['pending'][0]
+        self.assertEqual(set(samples['fictional_pending']['results']['pending'][0]),set(fictional))
+

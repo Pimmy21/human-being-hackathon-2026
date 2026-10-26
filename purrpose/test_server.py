@@ -47,14 +47,40 @@ class LocalServerTests(TestCase):
         self.assertIn('not a qualified donation recommendation', page)
         self.assertIsNone(self.app.latest_run)
 
+    def test_home_is_a_landing_page_that_hands_off_to_the_app(self):
+        status, page = self.request('/home.html')
+        self.assertEqual(status, 200)
+        self.assertIn('action="/app.html"', page)
+        self.assertIn('name="q"', page)
+        self.assertIn('href="/app.html"', page)
+        self.assertNotIn('src="/design-home.js"', page)
+        self.assertNotIn('<script>', page)
+        self.assertNotIn('style=', page)
+        self.assertEqual(self.request('/landing.js')[0], 200)
+
+    def test_app_shell_has_sidebar_fixed_composer_and_panel(self):
+        status, page = self.request('/app.html')
+        self.assertEqual(status, 200)
+        for marker in ('class="sidebar"', 'id="chat-scroll"', 'class="composer-wrap"', 'id="panel"',
+                       'href="/dashboard.html"', 'href="/home.html"'):
+            self.assertIn(marker, page)
+        self.assertLess(page.index('id="chat-scroll"'), page.index('class="composer-wrap"'))
+        self.assertNotIn('style=', page)
+        self.assertEqual(self.request('/app-shell.css')[0], 200)
+        self.assertEqual(self.request('/app.html?q=Tell+me+about+Lucy')[0], 200)
+
     def test_connected_design_has_local_assets_and_honest_scope(self):
-        status,page=self.request('/home.html')
+        status,page=self.request('/app.html')
         self.assertEqual(status,200)
         self.assertIn('one real pending case',page)
         self.assertNotIn('fonts.googleapis.com',page)
         self.assertNotIn('<script>',page)
         self.assertNotIn('Sign in',page)
         self.assertEqual(self.request('/design-home.js')[0],200)
+        self.assertEqual(self.request('/agent-map.js')[0],200)
+        self.assertEqual(self.request('/review-panel.js')[0],200)
+        for name in ('/api-client.js','/agent-map.js','/review-panel.js','/design-home.js'):
+            self.assertIn('src="'+name+'"',page)
         self.assertEqual(self.request('/design-home.css')[0],200)
         self.assertEqual(self.request('/design-favicon.svg')[0],200)
 
@@ -116,6 +142,48 @@ class LocalServerTests(TestCase):
         debug = self.request('/api/debug', {})[1]
         self.assertTrue(debug['latest_run']['trace'])
         self.assertEqual(debug['new_cloud_calls'], 0)
+
+    def test_runs_endpoints_list_and_get(self):
+        run_id = self.app.runs.add({'case_id': 'REAL-LUCY-GHS', 'case_name': 'Lucy', 'status': 'pending_evidence',
+                                    'scenario_type': 'real_public_observations',
+                                    'trace': [{'role': 'coordinator', 'action': 'start_review', 'at_ms': 0}]},
+                                   kind='real', started_at=1.0, ended_at=2.0, tools=[])
+        listed = self.request('/api/runs', {})[1]
+        self.assertEqual([r['run_id'] for r in listed['runs']], [run_id])
+        self.assertIn('cleared on restart', listed['scope'])
+        run = self.request('/api/runs/get', {'run_id': run_id})[1]
+        self.assertEqual(run['steps'][0]['agent'], 'orchestrator')
+        self.assertEqual(self.request('/api/runs/get', {'run_id': 'nope'})[1]['status'], 'run_not_found')
+
+    def test_runs_endpoints_keep_request_guards(self):
+        self.assertEqual(self.request('/api/runs', {}, {'X-Purrpose-Local': ''})[1], {'error': 'local_request_required'})
+        self.assertEqual(self.request('/api/runs', {}, {'X-Purrpose-Local': ''})[0], 403)
+        self.assertEqual(self.request('/api/runs', {'extra': 1})[0], 400)
+        self.assertEqual(self.request('/api/runs/get', {'run_id': 5})[0], 400)
+        self.assertEqual(self.request('/api/runs/get', {})[0], 400)
+
+    def test_fictional_review_is_recorded_as_fictional_run(self):
+        self.request('/api/supporter', {'city': 'Ottawa'})
+        runs = self.request('/api/runs', {})[1]['runs']
+        self.assertEqual([(r['kind'], r['scenario_type']) for r in runs], [('fictional', 'synthetic')])
+        run = self.request('/api/runs/get', {'run_id': runs[0]['run_id']})[1]
+        self.assertTrue(run['steps'])
+        self.assertTrue(all(type(s['at_ms']) is int and s['at_ms'] >= 0 for s in run['steps']))
+
+    def test_dashboard_page_served_with_local_assets(self):
+        status, page = self.request('/dashboard.html')
+        self.assertEqual(status, 200)
+        for name in ('/api-client.js', '/agent-map.js', '/dashboard.js'):
+            self.assertIn('src="'+name+'"', page)
+        self.assertNotIn('<script>', page)
+        self.assertNotIn('http://', page)
+        self.assertNotIn('https://', page)
+        self.assertNotIn('style=', page)
+        self.assertIn('Runs since this server started; cleared on restart.', page)
+        self.assertEqual(self.request('/dashboard.js')[0], 200)
+        self.assertEqual(self.request('/dashboard.css')[0], 200)
+        self.assertIn('/dashboard.html', self.request('/app.html')[1])
+        self.assertIn('class="sidebar"', page)
 
 
 if __name__ == '__main__':
