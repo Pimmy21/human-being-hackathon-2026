@@ -7,4 +7,4 @@ Run commands from the repository root, not from this package directory.
 - [Architecture and actual tool roles](../docs/ARCHITECTURE.md)
 - [Validation and known limits](../docs/VALIDATION.md)
 
-`python -m purrpose.server --port 8767` starts a local no-model/no-cloud-config interface. To reproduce the integrated demo, configure H-MEM, remote Zetaris JDBC and optional NVIDIA as described in Setup. Do not infer live integration from the interface loading successfully.
+`python -m purrpose.server --port 8767` starts a local no-model/no-cloud-config interface. To reproduce the integrated demo, configure H-MEM, remote Zetaris JDBC and Nightshift with its NVIDIA cloud lane as described in Setup. Do not infer live integration from the interface loading successfully.

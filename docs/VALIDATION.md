@@ -13,7 +13,7 @@ node purrpose/test_review_panel.cjs
 node purrpose/test_live_panels.cjs
 ```
 
-The validated build passed **323 Python tests** with the official H-MEM reference configured, plus the four JavaScript checks. Without that reference, H-MEM integration tests skip. Remote transports use offline fixtures/mocks in automated tests; running the suite does not automatically spend model credit or provision cloud resources.
+The validated build passed **328 Python tests** with the official H-MEM reference configured, plus the four JavaScript checks. Without that reference, H-MEM integration tests skip. Remote transports use offline fixtures/mocks in automated tests; running the suite does not automatically spend model credit or provision cloud resources.
 
 `python -m purrpose.doctor` checks local assets and runtime prerequisites without making external requests. A readiness check does not establish that a remote integration works.
 

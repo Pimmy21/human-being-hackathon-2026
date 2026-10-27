@@ -37,7 +37,7 @@ The yellow "No lane has duty Judge or Verify" notice is about Nightshift's overn
 
 ## 3. Give Purrpose the Nightshift token
 
-1. In Nightshift, open **Console** (the plug icon, Ctrl+5) and **Reveal → Copy** the API key. This is the *runtime token*, not your NVIDIA key.
+1. In Nightshift, open **Console** (the plug icon, Ctrl+5) and **Copy** beside the API key (revealing it is unnecessary). This is the *runtime token*, not your NVIDIA key.
 2. In your private `.env.local` (git-ignored, never commit it):
    ```
    PURRPOSE_MODEL_PROVIDER=meterless

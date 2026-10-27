@@ -57,7 +57,7 @@ python -m venv .venv
 
 Open [Purrpose](http://127.0.0.1:8767/home.html).
 
-This minimal launch opens the interface without cloud credentials. **To enable live directory queries, NVIDIA and persistent H-MEM, follow [Setup](docs/SETUP.md).** You need your own authorized Zetaris connection, vendor JDBC driver, Java/JVM, NVIDIA key and configured budgets. Credentials, cloud services and API credits are not included.
+This minimal launch opens the interface without cloud credentials. **To enable live directory queries, Nightshift/NVIDIA and persistent H-MEM, follow [Setup](docs/SETUP.md).** You need your own authorized Zetaris connection, vendor JDBC driver, Java/JVM, NVIDIA key and configured budgets. Credentials, cloud services and API credits are not included.
 
 ## Current scope
 

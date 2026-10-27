@@ -47,20 +47,15 @@ Local readiness check (no network/model call):
 
 Memory is stored under the state path and workspace you select. Reuse both to recall earlier records; keep different deployments/workspaces separate. Do not commit the state directory.
 
-## 3. NVIDIA (optional live intent classification)
+## 3. Nightshift and NVIDIA model requests
 
-Set these privately in `.env.local`:
+Follow [NIGHTSHIFT.md](NIGHTSHIFT.md) to install Nightshift desktop, configure its NVIDIA cloud lane, and save the runtime token privately. Set `PURRPOSE_MODEL_PROVIDER=meterless`, the local base URL, and the pinned Nemotron model in `.env.local`. A dedicated GPU or local model download is not required for this cloud route.
 
-- `PURRPOSE_MODEL_PROVIDER=nvidia_direct`
-- `NVIDIA_API_KEY`: your key
-- `NVIDIA_MODEL=nvidia/nemotron-3.5-lightning-30b-a3b`
-- All `PURRPOSE_MODEL_*` budget limits from the example
+Keep explicit call, token and time limits from `.env.example`, approved by the account holder. Counters are per process; restarting must not renew an agreed allowance. Existing shell variables override file settings.
 
-The example permits at most 3 model requests per server process, 128 output tokens per request, a 10-second timeout and no automatic retry. This is an application limit, not a claim about your real remaining credit. Obtain the account holder's budget approval. Do not reset the server to silently renew an agreed allowance.
+The model proposes an intent; application code validates it. Evidence checks remain code-based. A startup readiness label is not proof of a successful inference; inspect the actual request in Agent map and Nightshift receipts.
 
-Ordinary-language requests in the AWS-connected chat can use the model's validated intent to enter directory discovery. URL reads, explicit refreshes and safety/ambiguity handling can stay code-only. Repeated identical request/context pairs may use the intent cache; Agent map distinguishes cached from new calls. API success is established only after a request returns successfully, not by a startup `ready` label.
-
-Leave the provider blank to disable models. Invalid output, exhausted caps or a failed call fall back to bounded code interpretation without silently changing provider. Evidence checks and answer text remain code-based.
+Direct NVIDIA (`nvidia_direct`) is a separately configured development option, not the primary route and never an automatic provider fallback. Leave the provider blank for a no-model launch.
 
 ## 4. AWS-hosted Zetaris JDBC
 

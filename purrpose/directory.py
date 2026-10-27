@@ -213,7 +213,7 @@ class AWSDirectory:
             result.update(status='partial_before_deadline',error='45_second_budget_reached_no_automatic_retry')
             for r in result.get('candidates',[]):
                 if r['website_status'] in ('checking_historical_address','reading_public_pages','not_checked'):r['website_status']='not_completed_before_deadline'
-        result.update(qualified=False,remaining_minor=None,memory={'status':'not_configured'})
+        result.update(qualified=False,remaining_minor=None,memory={'status':'not_used' if memory else 'not_configured'})
         started=time.monotonic()
         if memory and result.get('directory_summary'):
             case=directory_case_id(city)
