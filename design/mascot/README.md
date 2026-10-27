@@ -1,5 +1,5 @@
 # Purrpose kitten
 
-`purrpose-kitten.gif` is the selected hand-painted orange kitten mascot: a slightly turned face, a grassy patch and a gentle blink/breathing loop. The animation is an idle illustration, not a full walking cycle.
+`purrpose-kitten.gif` is the selected hand-painted orange kitten mascot on a grassy patch. Its body and background remain fixed; only the eyes move in a gentle blink approximately every 4.7 seconds.
 
-Illustration frames were generated with OpenAI image generation and assembled into a looping GIF with a white matte for README compatibility. No external stock artwork is included.
+Illustration and eyelid frames were generated with OpenAI image generation. The eye regions were assembled over a single fixed base image to prevent frame-to-frame body or background jitter. The looping GIF uses a white matte and a shared palette for README compatibility. No external stock artwork is included.
