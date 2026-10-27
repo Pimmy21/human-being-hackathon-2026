@@ -1,8 +1,8 @@
-# Validation and limitations
+# Tests and verification
 
-## Automated checks
+## Automated tests
 
-The submission preparation runs the Python suite and JavaScript model checks locally. Tests use fixtures/mocks for remote integrations unless explicitly configured. They are not a substitute for live tool evidence.
+From the repository root:
 
 ```powershell
 $env:PURRPOSE_HMEM_REFERENCE=(Resolve-Path '../meterless/engines/hmem/reference/src/index.ts').Path
@@ -13,29 +13,23 @@ node purrpose/test_review_panel.cjs
 node purrpose/test_live_panels.cjs
 ```
 
-Without the reference environment variable, H-MEM integration tests skip. These checks do not automatically spend model credits, execute setup DDL or create cloud resources. `python -m purrpose.doctor` is a read-only local readiness check, not a live integration certificate.
+The validated build passed **323 Python tests** with the official H-MEM reference configured, plus the four JavaScript checks. Without that reference, H-MEM integration tests skip. Remote transports use offline fixtures/mocks in automated tests; running the suite does not automatically spend model credit or provision cloud resources.
 
-Submission preparation result: **323 Python tests passed with official H-MEM configured, no skips**. All four JavaScript checks above and chat JavaScript syntax passed. The local readiness checker found no missing assets. A clean candidate-file snapshot started successfully without external credentials and served home/chat/architecture/JavaScript on a separate localhost port, without external or model calls. PowerShell launcher syntax passed; script execution was blocked by this machine's execution policy, so the documented explicit Python command was used instead. The instructions do not require changing that policy.
+`python -m purrpose.doctor` checks local assets and runtime prerequisites without making external requests. A readiness check does not establish that a remote integration works.
 
-Local Markdown links and known local credential values were checked before publication; no broken links or credential exposure were detected. These are scoped release checks, not a security certification or full cloud reprovisioning test.
+## Live integrations verified
 
-## Actually observed in the team's configured environment
+| Component | Observed behavior |
+|---|---|
+| AWS-hosted Zetaris | SSL JDBC connection and fixed read-only identity/directory SELECTs succeeded. The CRA 2024 source returned 376 Ontario animal-charity rows in the observed run. |
+| NVIDIA Nemotron | A real hosted intent-classification request returned a validated organization-search intent and entered the directory workflow. |
+| Meterless H-MEM | Official reference engine saved observations and retrieved records under the matching directory/website scope. |
+| Public website reader | Read organizational pages and the explicitly supplied Lucy appeal/update while honoring applicable access rules. Failed or unsupported access remained incomplete. |
 
-- AWS Zetaris JDBC over SSL: SELECT 1, fixed Toronto Cat Rescue identity SELECT and directory SELECT succeeded. Directory returned 376 source rows, 47 cat-name matches, 28 usable unique historic contact addresses and 19 without one. These are observed counts from the 2024 source, not a permanent expectation or coverage of all cat services.
-- Official Meterless H-MEM reference on Node: save and scoped recall succeeded. Directory history recall retrieved five stored records in one observed run. Counts depend on local state and are not fixtures a clean clone will reproduce.
-- NVIDIA `nvidia/nemotron-3.5-lightning-30b-a3b`: one real natural-language request returned validated `list_organizations` intent and entered the live directory workflow. That observed call reported 573 tokens and 657 ms. Do not hard-code these measurements or promise the same values on another account.
-- Community Cats Toronto website: four public pages were read; they provided organizational/service context, not a verified individual medical appeal.
-- Guelph Humane Society Lucy appeal and birth update: each was read live after the permitted ten-second delay, saved, then reused for follow-ups. Later date/content is a publisher statement, not independent clinical confirmation. Related-news text was excluded to prevent borrowing other cases' amounts or medical statements.
-- Cat Busters/other source access failures stayed incomplete, with no invented evidence or qualification.
+These are observations from the configured environment, not a guarantee of availability, source freshness or identical results on another account. Raw runtime captures, credentials and memory state are not distributed as future live answers.
 
-Raw execution captures and H-MEM state remain local and ignored rather than being shipped as future live answers. API usage above is a historical observation, not an embedded recording or proof of current account credit.
+## Boundaries
 
-## Not established
+The current implementation does not independently authenticate clinical documents, certify current charity/risk status, guarantee remaining funding or produce a real qualified donation recommendation. It does not establish live Nightshift inference, automatic individual-appeal discovery for every organization or a production hosted deployment.
 
-- Independent clinical document authentication, current charity/risk clearance, reliable same-case remaining funding or a real qualified donation recommendation.
-- Automatic discovery of a current individual medical appeal for every candidate organization.
-- General-purpose LLM conversation or autonomous evidence reasoning from all supported URLs.
-- Live Nightshift inference in the team's validated environment. An operator-reported exception is not independently verified by this repository.
-- A fresh cloud deployment from scratch or a production hosted multi-user service.
-
-See [Architecture](ARCHITECTURE.md) for the separate curated/synthetic loops and generic live website checks.
+See [Setup](SETUP.md) for reproducible configuration and [Architecture](ARCHITECTURE.md) for the distinction between live public observations, curated case logic and synthetic repair tests.

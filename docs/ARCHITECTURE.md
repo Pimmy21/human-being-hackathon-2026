@@ -41,7 +41,7 @@ The arbitrary-website path currently lacks deep independent credibility evaluati
 
 **Meterless H-MEM:** actual official reference-engine save/recall. A directory investigation has an aggregate memory scope; selecting its already-read website does not invent an additional website save. Explicit website reads have separate website scopes. Empty history is shown honestly.
 
-**Nightshift:** alternative provider adapter exists, not live-connected in the validated setup. Direct NVIDIA never counts as Nightshift. Organizer exceptions must be separately confirmed.
+**Nightshift:** alternative provider adapter exists, not live-connected in the validated setup. Direct NVIDIA never counts as Nightshift.
 
 **Codex / Cursor / Claude and design tools:** development, testing, research assistance and interface authoring. They are not evidence validators running inside the deployed application.
 
@@ -51,4 +51,4 @@ No source permissions are inferred from a user saying a site is good. Public tec
 
 The model cache and budget, sessions and last 50 Runs are process-local. H-MEM persists in the configured workspace. Restarting loses temporary context and must not silently replenish an approved spending allowance. The server binds only to 127.0.0.1 and is not a production multi-user service.
 
-Full-version work includes document authentication, broader permitted media support, deeper cross-source evidence evaluation, automatic discovery of particular appeals and usability testing. The full product specification is retained under `docs/specification/`; those acceptance requirements do not imply the prototype implements them all.
+Full-version work includes document authentication, broader permitted media support, deeper cross-source evidence evaluation, automatic discovery of particular appeals and usability testing.

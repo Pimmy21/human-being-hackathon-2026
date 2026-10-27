@@ -1,8 +1,8 @@
 # Contributor instructions
 
-Read README.md, docs/SETUP.md and docs/ARCHITECTURE.md. Product requirements live in docs/specification/FULL_GUIDANCE.md with its AGENTS.md, examples and acceptance cases. The specification includes unimplemented future scope; current capability is documented in the README and validation notes.
+Read README.md, docs/SETUP.md and docs/ARCHITECTURE.md. Current capability is documented in the README and validation notes.
 
-Inspect Git state and preserve others' changes. Never force push or reset away work. Commit/push only with the current operator's authority. Keep product/setup/validation docs consistent with completed behavior. There is no handoff log in the submission tree.
+Inspect Git state and preserve others' changes. Never force push or reset away work. Commit/push only with the current operator's authority. Keep product/setup/validation docs consistent with completed behavior.
 
 Use code tests and existing authorized tools first. No secrets, private inputs, local memory, generated captures or driver binaries in Git. Do not exceed configured budgets, provision resources, deploy, contact third parties or execute setup SQL without authority. Account holders supply credentials and real credit availability.
 

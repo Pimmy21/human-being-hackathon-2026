@@ -2,7 +2,7 @@
 
 ## Access checklist
 
-The repository contains code, not a provisioned service. To reproduce the integrated recording you need:
+The repository contains code, not a provisioned service. To reproduce the integrated application you need:
 
 - Python 3.12+, Node.js 24+, Git and Java 21 (tested on Windows).
 - The official Meterless H-MEM reference source and writable local storage.
@@ -112,12 +112,12 @@ If Windows blocks PowerShell scripts under its execution policy, leave that poli
 
 Open `/home.html`, `/app.html`, `/dashboard.html` or `/architecture.html` on `http://127.0.0.1:8767`. `/registry.html` is a separate fixed identity diagnostic. The localhost URL works only on the machine running the server. GitHub Pages cannot host this Python/Java backend.
 
-## 6. Confirm real use
+## 6. Confirm integration status
 
-Use the [demo guide](DEMO.md). Confirm Zetaris SELECT results, a new NVIDIA call where intended, H-MEM save and a later recall. Open Agent map on the corresponding reply. A configured endpoint, installed package or old screenshot does not prove current use. Website 403s, redirects and robots restrictions can legitimately prevent a read.
+Use the chat and its execution records. Confirm Zetaris SELECT results, a new NVIDIA call where intended, H-MEM save and a later recall. Open Agent map on the corresponding reply. A configured endpoint, installed package or old screenshot does not prove current use. Website 403s, redirects and robots restrictions can legitimately prevent a read.
 
 ## Nightshift alternative and credit policy
 
 To use a separately running compatible Nightshift runtime, choose `PURRPOSE_MODEL_PROVIDER=meterless`, set its loopback base URL, real runtime token and routing model, and use the provider's required timeout (the adapter expects 180 seconds). Confirm the actual runtime contract before a paid request. The Web edition's in-tab endpoint is not established here as reachable from Python. Never paste an NVIDIA key into a runtime-token field.
 
-Nightshift is not live-verified in this submission environment. Direct NVIDIA is not a substitute for claiming Nightshift use. The operator reported an organizer exception; confirm and retain it separately. No credentials, free credits or exception are granted by cloning this repo.
+Nightshift is not live-verified in this submission environment. Direct NVIDIA is not a substitute for claiming Nightshift use. Credentials and API credits are not included.
