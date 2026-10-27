@@ -5,7 +5,7 @@ from pathlib import Path
 from math import sin,cos,pi
 from PIL import Image,ImageDraw
 ROOT=Path(__file__).resolve().parents[2]/'design/mascot'
-COLORS=['#ffffff','#624133','#f5a34a','#dc7d35','#ffd18b','#fff1d6','#ed9d94','#3f8a79','#dce7db','#bd672e']
+COLORS=['#ffffff','#624133','#f5a34a','#dc7d35','#ffd18b','#fff1d6','#ed9d94','#3f8a79','#dce7db','#bd672e','#91b65b','#648e44','#b5cf7b','#f5d780']
 W,H,S=88,58,4
 
 def frame(i):
@@ -20,7 +20,14 @@ def frame(i):
   d.polygon(points,fill=c)
   svg.append('<polygon points="'+' '.join(f'{x},{y}' for x,y in points)+f'" fill="{COLORS[c]}"/>')
  phase=2*pi*i/16;bob=round(.6*cos(phase*2));sway=round(sin(phase))
- rect((22,49,68,50),8)
+ # A small grassy patch with quiet blades and two tiny flowers.
+ poly([(10,50),(13,47),(75,47),(79,50),(76,54),(14,54)],10)
+ rect((15,52,74,54),11)
+ for x,y in [(14,48),(20,49),(27,47),(36,50),(44,48),(52,50),(62,47),(70,49),(75,48)]:
+  poly([(x-2,y+2),(x-2,y-1),(x,y+1),(x+1,y-3),(x+2,y+2)],11)
+ for x in (18,31,48,66,72):rect((x,51,x+3,51),12)
+ rect((16,47,16,49),11);rect((15,46,17,47),13)
+ rect((73,46,73,48),11);rect((72,45,74,46),5)
  # Upturned tail, a relaxed tabby silhouette.
  poly([(27,30+bob),(21,28),(17+sway,21),(15+sway,11),(13+sway,7),(10+sway,7),(9+sway,11),(11+sway,22),(16,31),(24,36+bob)],1)
  poly([(25,31+bob),(20,28),(15+sway,20),(13+sway,10),(11+sway,9),(11+sway,14),(13+sway,23),(18,31),(24,34+bob)],2)

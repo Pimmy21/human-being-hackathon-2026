@@ -1,6 +1,6 @@
 # Purrpose orange kitten
 
-Original side-view pixel-art mascot for Purrpose. The kitten walks to the right with its tail upright and an alternating four-leg gait. The transparent animation loops every 1.44 seconds.
+Original side-view pixel-art mascot for Purrpose. The kitten walks to the right on a small grassy patch, with its tail upright and an alternating four-leg gait. The transparent animation loops every 1.44 seconds.
 
 - `purrpose-ginger.gif`: README animation, 16 frames.
 - `purrpose-ginger.svg`: editable static vector version.
