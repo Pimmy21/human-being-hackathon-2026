@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="design/mascot/purrpose-ginger.gif" width="224" alt="A little orange cat walking on a little patch of grass with its tail held high">
+  <img src="design/mascot/purrpose-kitten.gif" width="224" alt="A fluffy orange kitten on grass, looking toward you and gently blinking">
 </p>
 
 # Purrpose

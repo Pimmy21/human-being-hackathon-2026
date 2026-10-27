@@ -1,10 +1,5 @@
-# Purrpose orange kitten
+# Purrpose kitten
 
-Original side-view pixel-art mascot for Purrpose. The kitten walks to the right on a small grassy patch, with its tail upright and an alternating four-leg gait. The transparent animation loops every 1.44 seconds.
+`purrpose-kitten.gif` is the selected hand-painted orange kitten mascot: a slightly turned face, a grassy patch and a gentle blink/breathing loop. The animation is an idle illustration, not a full walking cycle.
 
-- `purrpose-ginger.gif`: README animation, 16 frames.
-- `purrpose-ginger.svg`: editable static vector version.
-- `purrpose-ginger.png`: static transparent image.
-- `build_mascot.py`: original source generator. Run with Python and Pillow to regenerate the assets.
-
-No third-party artwork is included. Pillow is only needed to rebuild design assets, not to run the application.
+Illustration frames were generated with OpenAI image generation and assembled into a looping GIF with a white matte for README compatibility. No external stock artwork is included.
