@@ -1,19 +1,16 @@
-"""Original repo-native pixel kitten; SVG source and derived animated GIF.
-No external image, model call or asset download is used.
+"""Original side-view pixel kitten, with SVG source and a derived walk-cycle GIF.
+Requires Pillow only when rebuilding design assets. No third-party artwork.
 """
 from pathlib import Path
-from math import sin,pi
+from math import sin,cos,pi
 from PIL import Image,ImageDraw
-import html
 ROOT=Path(__file__).resolve().parents[2]/'design/mascot'
-ROOT.mkdir(parents=True,exist_ok=True)
-COLORS=['#ffffff','#613c32','#f5a34a','#e78335','#ffd18b','#fff2d7','#ef9a91','#3f8a79','#bfe0ce']
-W,H,S=64,56,4
+COLORS=['#ffffff','#624133','#f5a34a','#dc7d35','#ffd18b','#fff1d6','#ed9d94','#3f8a79','#dce7db','#bd672e']
+W,H,S=88,58,4
 
 def frame(i):
- im=Image.new('P',(W,H),0)
- palette=[]
- for color in COLORS:palette.extend(bytes.fromhex(color[1:]))
+ im=Image.new('P',(W,H),0);palette=[]
+ for c in COLORS:palette.extend(bytes.fromhex(c[1:]))
  im.putpalette(palette+[0]*(768-len(palette)))
  d=ImageDraw.Draw(im);svg=[]
  def rect(box,c):
@@ -21,45 +18,46 @@ def frame(i):
   svg.append(f'<rect x="{x}" y="{y}" width="{r-x+1}" height="{b-y+1}" fill="{COLORS[c]}"/>')
  def poly(points,c):
   d.polygon(points,fill=c)
-  svg.append(f'<polygon points="'+ ' '.join(f'{x},{y}' for x,y in points)+f'" fill="{COLORS[c]}"/>')
- # Three small stationary ground pixels keep the bouncing body visually anchored.
- rect((21,48,44,49),8)
- sway=round(3*sin(2*pi*i/16));bob=1 if i in range(4,10) else 0
- # Tail sits behind the body and sways slowly.
- tail=[(40,43),(49,43),(53+sway,39),(54+sway,31),(52+sway,28),(49+sway,29),(49+sway,36),(46,38),(40,38)]
- poly(tail,1)
- poly([(42,40),(48,40),(51+sway,36),(51+sway,31),(52+sway,31),(52+sway,38),(48,42),(42,42)],2)
- rect((50+sway,30,52+sway,32),4)
- # Seated body, chest, paws.
- poly([(22,28+bob),(40,28+bob),(44,36),(44,46),(40,48),(21,48),(18,45),(19,36)],1)
- poly([(23,29+bob),(39,29+bob),(42,37),(42,45),(38,46),(22,46),(20,44),(21,36)],2)
- poly([(28,31+bob),(35,31+bob),(37,39),(35,44),(28,44),(26,39)],5)
- rect((20,43,27,46),4);rect((35,43,42,46),4)
- rect((24,44,24,46),3);rect((38,44,38,46),3)
- rect((21,34,24,35),3);rect((39,34,41,35),3)
- # Ear tips and a broad, gently smiling face.
- poly([(17,12+bob),(17,4+bob),(20,4+bob),(26,11+bob),(37,11+bob),(43,4+bob),(46,4+bob),(46,18+bob),(48,21+bob),(48,28+bob),(44,33+bob),(20,33+bob),(15,28+bob),(15,20+bob)],1)
- poly([(19,13+bob),(19,7+bob),(25,13+bob),(38,13+bob),(44,7+bob),(44,18+bob),(46,22+bob),(46,27+bob),(42,31+bob),(21,31+bob),(17,27+bob),(17,21+bob)],2)
- poly([(20,9+bob),(24,13+bob),(20,15+bob)],6)
- poly([(43,9+bob),(39,13+bob),(43,15+bob)],6)
- rect((29,13+bob,31,17+bob),3);rect((33,13+bob,35,16+bob),3)
- rect((18,21+bob,22,22+bob),3);rect((41,21+bob,45,22+bob),3)
- poly([(26,25+bob),(37,25+bob),(39,28+bob),(36,31+bob),(27,31+bob),(24,28+bob)],5)
- blink=i in (12,13)
- if blink:
-  rect((24,22+bob,27,22+bob),1);rect((37,22+bob,40,22+bob),1)
- else:
-  rect((25,20+bob,27,23+bob),1);rect((37,20+bob,39,23+bob),1)
-  rect((25,20+bob,25,20+bob),5);rect((37,20+bob,37,20+bob),5)
- rect((30,25+bob,33,26+bob),6);rect((31,27+bob,32,28+bob),1)
- rect((28,29+bob,30,29+bob),1);rect((33,29+bob,35,29+bob),1)
- rect((20,26+bob,23,26+bob),1);rect((40,26+bob,43,26+bob),1)
- # Tiny teal collar adds a recognizable Purrpose accent.
- rect((25,32+bob,38,33+bob),7);rect((31,34+bob,33,35+bob),4)
- svgtext=f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" shape-rendering="crispEdges" role="img" aria-label="Orange kitten">'+''.join(svg)+'</svg>'
+  svg.append('<polygon points="'+' '.join(f'{x},{y}' for x,y in points)+f'" fill="{COLORS[c]}"/>')
+ phase=2*pi*i/16;bob=round(.6*cos(phase*2));sway=round(sin(phase))
+ rect((22,49,68,50),8)
+ # Upturned tail, a relaxed tabby silhouette.
+ poly([(27,30+bob),(21,28),(17+sway,21),(15+sway,11),(13+sway,7),(10+sway,7),(9+sway,11),(11+sway,22),(16,31),(24,36+bob)],1)
+ poly([(25,31+bob),(20,28),(15+sway,20),(13+sway,10),(11+sway,9),(11+sway,14),(13+sway,23),(18,31),(24,34+bob)],2)
+ rect((10+sway,9,12+sway,12),5)
+ rect((12+sway,18,15+sway,20),3)
+ def leg(anchor,offset,far=False):
+  t=phase+offset;foot=anchor+round(5*sin(t));bottom=47-round(max(0,cos(t))*3)
+  poly([(anchor-3,33+bob),(anchor+3,33+bob),(anchor+2,39),(foot+2,bottom-3),(foot+5,bottom-2),(foot+5,bottom),(foot-2,bottom),(foot-3,bottom-4),(anchor-2,39)],1)
+  poly([(anchor-1,34+bob),(anchor+1,34+bob),(anchor,39),(foot+1,bottom-2),(foot+3,bottom-1),(foot-1,bottom-1),(foot-1,bottom-4),(anchor-1,39)],9 if far else 2)
+  rect((foot-1,bottom-2,foot+3,bottom-1),4 if far else 5)
+ # Far legs are drawn first and alternate with the near pair.
+ leg(30,pi,True);leg(54,0,True)
+ poly([(24,23+bob),(44,21+bob),(56,23+bob),(61,28+bob),(60,35+bob),(54,39+bob),(30,40+bob),(23,36+bob),(21,29+bob)],1)
+ poly([(25,25+bob),(43,23+bob),(55,25+bob),(58,29+bob),(57,34+bob),(52,37+bob),(30,38+bob),(25,35+bob),(23,29+bob)],2)
+ poly([(29,34+bob),(44,35+bob),(54,33+bob),(53,37+bob),(31,38+bob)],4)
+ poly([(30,25+bob),(33,24+bob),(32,30+bob),(29,31+bob)],3)
+ poly([(39,24+bob),(42,24+bob),(41,30+bob),(38,31+bob)],3)
+ poly([(48,25+bob),(51,25+bob),(50,29+bob),(47,30+bob)],3)
+ leg(28,0);leg(55,pi)
+ # Small side-facing head and two upright ears.
+ poly([(52,23+bob),(51,13+bob),(54,11+bob),(60,16+bob),(64,10+bob),(67,11+bob),(68,19+bob),(71,22+bob),(72,25+bob),(77,26+bob),(77,29+bob),(72,31+bob),(66,35+bob),(57,34+bob),(52,30+bob)],1)
+ poly([(54,23+bob),(53,15+bob),(55,14+bob),(60,19+bob),(65,13+bob),(66,20+bob),(69,23+bob),(70,27+bob),(75,27+bob),(74,29+bob),(70,30+bob),(65,33+bob),(58,32+bob),(54,29+bob)],2)
+ poly([(55,16+bob),(58,19+bob),(55,21+bob)],6)
+ poly([(64,16+bob),(65,14+bob),(65,20+bob),(62,21+bob)],6)
+ poly([(66,28+bob),(73,27+bob),(75,28+bob),(71,31+bob),(66,32+bob),(63,30+bob)],5)
+ rect((65,23+bob,67,25+bob),1);rect((65,23+bob,65,23+bob),5)
+ rect((75,26+bob,77,27+bob),6)
+ rect((71,30+bob,73,30+bob),1)
+ rect((57,25+bob,60,26+bob),3);rect((59,29+bob,62,29+bob),3)
+ rect((72,24+bob,78,24+bob),1)
+ # Subtle collar accent matches the earlier mascot.
+ poly([(54,30+bob),(57,32+bob),(64,33+bob),(63,35+bob),(57,34+bob),(53,32+bob)],7)
+ rect((62,35+bob,64,37+bob),4)
+ svgtext=f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" shape-rendering="crispEdges" role="img" aria-label="Orange kitten walking to the right">'+''.join(svg)+'</svg>'
  return im.resize((W*S,H*S),Image.Resampling.NEAREST),svgtext
 frames=[frame(i)[0] for i in range(16)]
-frames[0].save(ROOT/'purrpose-ginger.gif',save_all=True,append_images=frames[1:],duration=150,loop=0,transparency=0,disposal=2,optimize=False)
+frames[0].save(ROOT/'purrpose-ginger.gif',save_all=True,append_images=frames[1:],duration=90,loop=0,transparency=0,disposal=2,optimize=False)
 frames[0].save(ROOT/'purrpose-ginger.png',transparency=0)
 (ROOT/'purrpose-ginger.svg').write_text(frame(0)[1],encoding='utf-8')
-print('Original kitten: 16 frames, 2.4 second loop, GIF bytes', (ROOT/'purrpose-ginger.gif').stat().st_size)
+print('Side-view walking kitten generated:',(ROOT/'purrpose-ginger.gif').stat().st_size,'bytes')
