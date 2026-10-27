@@ -22,6 +22,7 @@
   }
   function nvidiaText(agentRun){
     const m=agentRun&&agentRun.model;
+    if(m&&m.route==='meterless')return 'NVIDIA Nemotron · not directly called (Nightshift route)';
     if(m&&m.status==='failed')return 'NVIDIA Nemotron · call failed, answered with fixed phrases';
     if(m&&m.status==='invalid_output'){
       const tokens=typeof m.total_tokens==='number'?' · '+m.total_tokens+' tokens':'';
@@ -39,14 +40,27 @@
     if(!events.length)return 'H-MEM · not recorded for this run';
     if(events.length===1&&events[0].status==='not_configured')return 'H-MEM · not configured';
     const parts=events.map(t=>{
-      const state=t.status==='ok'?'ok':t.status==='not_configured'?'not configured':'failed';
+      const state=t.status==='ok'?'ok':t.status==='not_configured'?'not configured':t.status==='not_used'?'not used':'failed';
       return t.operation+' '+state+(t.status!=='not_configured'?' ('+t.duration_ms+' ms)':'')+(t.memory_id?' · '+t.memory_id:'');
     });
     return 'H-MEM · '+parts.join(' · ');
   }
+  function zetarisText(run){
+    const events=(run&&run.tools||[]).filter(t=>t.tool==='zetaris');
+    if(!events.length)return 'Zetaris · not used in this answer';
+    return 'Zetaris · '+events.map(t=>t.operation+' '+(t.status==='completed'||t.status==='ok'?'completed':'failed')+' · '+t.duration_ms+' ms'+(t.error_category?' · '+t.error_category:'')).join(' · ')+' · historical identity only';
+  }
+  function nightshiftText(agentRun){
+    const model=agentRun&&agentRun.model;
+    if(model&&model.route==='meterless'&&model.new_cloud_calls>0)return 'Nightshift · '+pluralCalls(model.new_cloud_calls)+(model.status==='failed'?' · failed':' · request recorded')+(typeof model.total_tokens==='number'?' · '+model.total_tokens+' tokens':'');
+    return 'Nightshift · not connected';
+  }
   function buildMapModel(run,agentRun) {
-    const tools=[{tool:'nvidia',text:nvidiaText(agentRun)},{tool:'hmem',text:hmemText(run)},
-      {tool:'zetaris',text:'Zetaris · not connected yet'},{tool:'nightshift',text:'Nightshift · not connected'}];
+    const modelLatency=agentRun&&agentRun.model&&agentRun.model.new_cloud_calls>0&&typeof agentRun.model.latency_ms==='number'?' · '+agentRun.model.latency_ms+' ms':'';
+    const tools=[{tool:'nvidia',text:nvidiaText(agentRun)+modelLatency},{tool:'hmem',text:hmemText(run)},
+      {tool:'zetaris',text:zetarisText(run)},{tool:'nightshift',text:nightshiftText(agentRun)}];
+    const web=(run&&run.tools||[]).filter(t=>t.tool==='web');
+    if(web.length)tools.push({tool:'web',text:'Public web · '+web.filter(t=>t.status==='ok').length+' read · '+web.filter(t=>t.status==='failed').length+' failures · '+web.reduce((n,t)=>n+(t.duration_ms||0),0)+' ms'});
     if(!run)return {header:(agentRun&&agentRun.note)||'No run for this answer',note:FIXED_NOTE,fictional:false,cards:[],tools,log:{}};
     const byAgent=Object.fromEntries((run.agents||[]).map(a=>[a.agent,a]));
     const cards=ORDER.map(key=>{
@@ -93,8 +107,8 @@
     }
     const toolList=el('ul',undefined,'map-tools');
     for(const t of model.tools){
-      const used=!/not used|not connected|not configured|not recorded/.test(t.text);
-      const failed=/failed|didn't fit/.test(t.text);
+      const used=!/not used|not directly called|not connected|not configured|not recorded/.test(t.text);
+      const failed=/failed|didn't fit/.test(t.text)||(t.tool==='web'&&/· [1-9]\d* failures/.test(t.text));
       toolList.append(el('li',t.text,failed?'tool-failed':used?'tool-used':'tool-idle'));
     }
     container.append(el('h4','Tools in this answer','map-subhead'),toolList,logBox,el('p',model.note,'map-note'));

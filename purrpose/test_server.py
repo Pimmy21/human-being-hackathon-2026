@@ -87,8 +87,10 @@ class LocalServerTests(TestCase):
     def test_mentor_explanation_and_organization_walkthrough_are_explicit(self):
         status, page = self.request('/architecture.html')
         self.assertEqual(status, 200)
-        self.assertIn('ONE SEPARATE LIVE TEST', page)
-        self.assertIn('DEFERRED / NOT CONNECTED', page)
+        self.assertIn('AWS-hosted Zetaris', page)
+        self.assertIn('Optional NVIDIA Nemotron', page)
+        self.assertIn('Nightshift is not live-connected', page)
+        self.assertIn('Deeper credibility evaluation', page)
         self.assertNotIn('<script', page)
         self.assertEqual(self.request('/architecture.css')[0], 200)
         status, page = self.request('/organizations.html')

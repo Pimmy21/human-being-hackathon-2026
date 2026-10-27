@@ -20,7 +20,7 @@ function sync(){send.disabled=busy||!box.value.trim();box.style.height='auto';bo
 box.addEventListener('input',sync);
 box.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(!send.disabled)form.requestSubmit();}});
 for(const chip of document.querySelectorAll('[data-text]'))chip.addEventListener('click',()=>{box.value=chip.dataset.text;sync();box.focus();});
-function link(parent,label,url){try{const u=new URL(url);if(u.protocol!=='https:'||!['guelphhumane.ca','apps.cra-arc.gc.ca'].includes(u.hostname))return;const a=node('a',label);a.href=u.href;a.target='_blank';a.rel='noopener noreferrer';const p=node('p');p.append(a);parent.append(p);}catch(_){}}
+function link(parent,label,url){try{const u=new URL(url);if(u.protocol!=='https:'||u.username||u.password)return;const a=node('a',label);a.href=u.href;a.target='_blank';a.rel='noopener noreferrer';const p=node('p');p.append(a);parent.append(p);}catch(_){}}
 function action(parent,label,message){const b=node('button',label);b.type='button';b.addEventListener('click',()=>submit(message));parent.append(b);}
 function details(parent,label,value){const d=node('details');d.append(node('summary',label),node('pre',JSON.stringify(value,null,2)));parent.append(d);}
 function render(result,host,chat){
@@ -48,6 +48,31 @@ function render(result,host,chat){
   a.append(check);
   if(live.analysis)details(a,'Source-linked candidate statements; not proof',live.analysis);
  }
+ if(result.publication_checklist?.length){
+  const list=node('ul');
+  for(const f of result.publication_checklist){const item=node('li');
+   item.append(node('strong',f.label+': '),document.createTextNode(f.status==='unable_to_assess'?'Not assessed — general guidance. ':f.status==='not_found_in_read_pages'?'Not found in the pages read. ':'Related wording found; still needs verification. '),node('p',f.what_to_publish_or_clarify));
+   for(const observation of (f.observations||[]).slice(0,1)){item.append(node('blockquote',observation.quote));link(item,'Source for this observation',observation.url);}
+   list.append(item);
+  }
+  a.append(list,node('p','Update your own public website, then ask for a fresh check. These suggestions do not guarantee trust or donations.'));
+ }
+ if(result.site_review){const r=result.site_review;
+  if(!result.source_summary)a.append(node('p','Website reading finished; open Review for the available information.'));
+  for(const page of (r.candidates||[]).filter(c=>c.status==='read'))link(a,page.title||page.url,page.url);
+  if(result.memory_note)a.append(node('p',result.memory_note));
+
+ }
+ if(result.directory_result){const r=result.directory_result;
+  a.append(node('p','2024 government directory · cat-related names only · up to 3 website checks · city/name order'));
+  for(const c of r.candidates||[]){a.append(node('h2',c.organization_full_name),node('p','Historical office city: '+c.reported_city+' · Charity number: '+c.organization_number),node('p','Website check: '+words(c.website_status)+' · Current need and remaining amount: unverified'));
+   link(a,'Government identity source',c.identity_source);if(c.website_url){link(a,'Historically reported website',c.website_url);action(a,'Investigate this website','As a supporter, check '+c.website_url);}
+   const review=c.website_review;if(review){a.append(node('p','Pages read: '+(review.organization_review?.pages_read||0)));details(a,'Website observations and missing information',review.organization_review||review);}}
+  if((r.pending_website_candidates||[]).length){a.append(node('h3','Website address still to confirm'));for(const c of r.pending_website_candidates)a.append(node('p',c.organization_full_name+' — '+c.reported_city+' · no unique website in this historical contact source; not a negative finding.'));}
+  a.append(node('p','H-MEM: '+words(r.memory?.status||'not configured')));details(a,'Discovery scope and actual tool results',{status:r.status,summary:r.directory_summary,limits:r.limits,tools:r.tools});
+ }
+ if(result.registry_result){const r=result.registry_result,id=r.identity||r;a.append(node('h2',id.organization_full_name||'Historical registry lookup'),node('p','2024 historical identity only; not current status or case approval.'),node('p','Query: '+words(r.status)),node('p','H-MEM: '+words(r.memory.status)+(r.memory.memory_id?' · '+r.memory.memory_id:'')));link(a,'Government dataset',r.source);}
+ if(result.workflow_history){const h=result.workflow_history;a.append(node('p','Retained history: '+(h.entries||[]).length+' records. No new source or SQL request.'));for(const e of h.entries||[])a.append(node('p',e.memory_id+' · '+when(e.system_recorded_at)));}
  if(result.organization_review)a.append(node('p','Here is the public-information checklist. Open the Review tab to see each item.'));
  if(result.research_history)details(a,'Retained review; not a current source check',result.research_history);
  if(typeof buildReviewModel==='function'&&buildReviewModel(result)){const r=node('button','Open review');r.type='button';r.className='run-link';r.addEventListener('click',()=>{if(current!==chat)open(chat);select(chat,result);openPanel('review');});a.append(r);}
@@ -63,12 +88,7 @@ async function submit(raw){
  chatScroll.scrollTop=chatScroll.scrollHeight;notice.textContent='Checking…';
  try{
   let query=message;
-  if(/^https?:\/\//i.test(message)){
-   const known=['https://guelphhumane.ca/news/urgent-abandoned-in-a-box-and-pregnant-lucy-needs-your-help/','https://guelphhumane.ca/news/update-lucy-gave-birth-to-her-kittens-at-ghs/'];
-   if(!known.includes(message)){render({reply:'This prototype supports only the configured Lucy articles. This URL was not fetched. Try “I want to help a cat” or use the example request.'},host,chat);notice.textContent='Unsupported URL; no source was fetched.';return;}
-   query='Tell me about Lucy';
-  }
-  const result=await api.chat(chat.id,query);render(result,host,chat);chat.latest=result;if(current===chat)select(chat,result);you.scrollIntoView({block:'start',behavior:'smooth'});box.value='';const mi=result.model_intent;notice.textContent=(result.new_cloud_calls?`A configured model (${mi&&mi.route}) classified this message; code wrote the answer. `:mi&&mi.status==='cached'?'Reused an earlier model classification; no new cloud-model call. ':'No new cloud-model call. ')+'No payment. Source refresh happens only when explicitly requested.';
+  const result=await api.chat(chat.id,query);render(result,host,chat);chat.latest=result;if(current===chat)select(chat,result);chatScroll.scrollTop=chatScroll.scrollHeight;box.value='';const mi=result.model_intent;notice.textContent=(result.new_cloud_calls?`A configured model (${mi&&mi.route}) classified this message; code wrote the answer. `:mi&&mi.status==='cached'?'Reused an earlier model classification; no new cloud-model call. ':'No new cloud-model call. ')+'No payment. Source refresh happens only when explicitly requested.';
  }catch(error){notice.textContent=error.code==='timeout_result_unknown'?'The result is uncertain after a timeout. Backend work may still be running; do not automatically retry.':'The request did not complete. No new result is confirmed.';box.value=message;}
  finally{busy=false;for(const b of document.querySelectorAll('.chip,.results button'))b.disabled=false;sync();}
 }
@@ -76,7 +96,7 @@ form.addEventListener('submit',e=>{e.preventDefault();submit(box.value);});
 function sourcesAndLimits(parent,result){
  const d=node('details');d.className='sources-limits';d.append(node('summary','Sources & limits'));
  const add=t=>{if(t)d.append(node('p',t));};
- add(result.mode==='model_intent_validated'?'Your request was classified by a configured model; code wrote this answer.':'Your request was understood by bounded phrase matching; code wrote this answer.');
+ add(result.mode==='explicit_public_workflow'?'An explicit user action ran a bounded workflow or used its saved results. No model called for this action.':result.mode==='model_intent_validated'?'Your request was classified by a configured model; code wrote this answer.':'Your request was understood by bounded phrase matching; code wrote this answer.');
  const r=result.research;if(r){for(const s of r.sources||[])link(d,s.publisher+' · '+s.published_on,s.url);for(const t of r.limitations||[])add(t);}
  const q=result.results;if(q){for(const group of ['qualified','pending','no_current_gap'])for(const c of q[group]||[]){for(const s of c.evidence||[])link(d,s.publisher+' · '+s.source_date,s.reference);for(const t of c.limitations||[])add(t);}add(q.coverage);}
  if(result.live_read&&result.live_read.error)add('Source read problem at '+result.live_read.stage+': '+result.live_read.error);

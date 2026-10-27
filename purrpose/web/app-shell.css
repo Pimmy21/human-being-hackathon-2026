@@ -84,3 +84,4 @@ body.app-shell{height:100vh;height:100dvh;min-height:0;overflow:hidden;display:g
 .how-steps strong{color:var(--text);font-weight:650}
 .landing-scope{margin:22px 0 0;font-size:14px;color:var(--muted)}
 .landing footer a{color:#494096;text-underline-offset:3px}
+html:has(> body.app-shell){height:100%;overflow:hidden}

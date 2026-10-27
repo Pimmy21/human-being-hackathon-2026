@@ -35,7 +35,7 @@ assert.equal(m.tools.length,4);
 assert.equal(m.tools[0].text,'NVIDIA Nemotron · 1 call · 321 tokens');
 for(const t of m.tools.slice(1))assert.ok(!/token/i.test(t.text));
 assert.deepEqual(m.tools.map(t=>t.tool),['nvidia','hmem','zetaris','nightshift']);
-assert.equal(m.tools[2].text,'Zetaris · not connected yet');
+assert.equal(m.tools[2].text,'Zetaris · not used in this answer');
 assert.equal(m.tools[3].text,'Nightshift · not connected');
 
 // tokens only when a call happened

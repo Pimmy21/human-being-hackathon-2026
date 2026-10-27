@@ -12,6 +12,7 @@ from .research_case import assess_saved_research
 from .organization_research import organization_research, LINKS as REAL_LINKS
 from .model_intent import ModelIntent
 from .chat_intent import ONTARIO_CITIES
+from .live_chat import handle as handle_live_workflow
 
 GUARDS = ('ignore instructions', 'ignore previous', '忽略规则', '转账', 'pay for me', 'donate for me', '替我捐')
 NEGATIONS = ("don't", 'do not', 'not ottawa', 'not toronto', '不要', '不想', '不是')
@@ -68,6 +69,8 @@ class Conversation:
     def reply(self, session_id, message):
         self.app.turn = {'run_id': None, 'reused_read': False}
         result = self.answer(session_id, message)
+        if result.get('research') or result.get('results'):
+            self.sessions[session_id]['tool_context'] = 'legacy_case'
         turn = self.app.turn
         if turn['run_id']:
             self.app.runs.tag_session(turn['run_id'], session_id)
@@ -85,13 +88,18 @@ class Conversation:
             return None
         calls = info.get('new_cloud_calls', 0)
         tokens = None
+        latency = None
+        returned_model = None
         if calls > 0:
             trace = getattr(getattr(self.model, 'provider', None), 'trace', None) or []
             usage = trace[-1].get('usage') if trace else None
             total = usage.get('total_tokens') if isinstance(usage, dict) else None
             tokens = total if type(total) is int else None
+            latency = trace[-1].get('latency_ms') if trace else None
+            returned_model = trace[-1].get('returned_model') if trace else None
         return {'route': info.get('route'), 'status': info.get('status'), 'intent': info.get('intent'),
-                'new_cloud_calls': calls, 'total_tokens': tokens}
+                'new_cloud_calls': calls, 'total_tokens': tokens,
+                'latency_ms': latency, 'returned_model': returned_model}
 
     def answer(self, session_id, message):
         if (not isinstance(session_id, str) or not re.fullmatch(r'[A-Za-z0-9-]{1,80}', session_id)
@@ -104,10 +112,30 @@ class Conversation:
         state = self.sessions[session_id]
         text = message.strip().casefold()
         zh = bool(re.search(r'[\u4e00-\u9fff]', text))
+        preclassified=None
+        cloud_discovery=(self.model is not None and all(hasattr(self.app.registry,k) for k in ('env_file','python','jvm'))
+                         and not code_only(text) and not re.search(r'https?://',text))
+        if cloud_discovery:
+            preclassified=self.model.propose(message.strip(),model_context(state))
+        if not any(w in text for w in GUARDS):
+            live_message=message
+            if preclassified and preclassified[0] and preclassified[0]['intent'] in ('discover','list_organizations'):
+                proposal=preclassified[0]
+                # Only a validated search intent can select the bounded directory operation.
+                named=cities_in(text)
+                city=proposal.get('city') or (named[0] if len(named)==1 else None)
+                place=city or ('Ontario' if proposal.get('region_wide') or 'ontario' in text else '')
+                live_message='find cat rescue organizations'+(' in '+place if place else '')
+            live = handle_live_workflow(self.app, state, live_message, zh)
+            if live is not None:
+                if preclassified:
+                    info=preclassified[1]
+                    live.update(model_intent=info,new_cloud_calls=info['new_cloud_calls'])
+                return live
         offer_ontario = state.pop('offer_ontario', False)  # An Ontario offer lasts for one reply only.
         if self.model is None or code_only(text):
             return self.match(state, text, zh)
-        proposal, info = self.model.propose(message.strip(), model_context(state, offer_ontario))
+        proposal, info = preclassified if preclassified is not None else self.model.propose(message.strip(), model_context(state, offer_ontario))
         meta = {'model_intent': info, 'new_cloud_calls': info['new_cloud_calls']}
         if proposal is None:
             return self.match(state, text, zh, meta)  # Labelled bounded-matching fallback.

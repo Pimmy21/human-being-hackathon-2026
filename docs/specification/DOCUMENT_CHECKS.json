@@ -1,0 +1,29 @@
+{
+  "scope": "Historical static review of the target specification only; not current application or integration validation",
+  "revision": "Archived specification review 2.2; see docs/VALIDATION.md for shipped prototype checks",
+  "markdown_documents": 10,
+  "json_examples_checked": 7,
+  "acceptance_case_count": 127,
+  "new_agent_behavior_cases": 16,
+  "word_count": 20193,
+  "broken_links_or_format_errors": [],
+  "human_agent_rule_mapping": "17 stable human rule IDs and local heading links checked",
+  "agent_roles": [
+    "coordinator",
+    "identity_risk",
+    "rescue_need",
+    "funding_channel",
+    "evaluator",
+    "dispute_resolver"
+  ],
+  "unchanged_safety_invariants_checked": [
+    "demo extraction cap shared by roles",
+    "production limits explicit, not inherited",
+    "no automatic established risk-hold restoration",
+    "unconfigured budgets block external calls"
+  ],
+  "application_tests_run": false,
+  "live_provider_calls_made_for_this_revision": false,
+  "budget_clarification": "demo-only numerical caps; separate production efficiency targets and managed service budget",
+  "r17_confirmation": "recorded; build tasks B01-B06 defined; not executed"
+}

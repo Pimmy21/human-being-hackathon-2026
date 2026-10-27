@@ -17,7 +17,8 @@ def inspect_environment(reference=None, node='node'):
               'web/landing.html','web/landing.js','web/app-shell.css',
               'web/design-favicon.svg','web/design-favicon-warm.svg',
               'web/organization-demo.html','web/organization-demo.js',
-              'web/architecture.html','web/architecture.css']
+              'web/architecture.html','web/architecture.css',
+              'web/discover.html','web/discover.js','web/registry.html','web/registry.js']
     missing = [name for name in assets if not (ROOT/name).is_file()]
     try:
         ZoneInfo('America/Toronto')

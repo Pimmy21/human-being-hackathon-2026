@@ -29,6 +29,23 @@ class FakeProvider:
 
 
 class ModelConversationTests(TestCase):
+    def test_live_directory_uses_one_validated_model_intent(self):
+        from types import SimpleNamespace
+        from .registry import RemoteRegistry
+        provider=FakeProvider(intent('discover','Toronto'))
+        app=LocalApp(model=provider,registry=RemoteRegistry('unused.env','unused-python','unused-jvm'))
+        calls=[]
+        def find(city,memory):
+            calls.append(city)
+            return {'status':'candidate_checks_completed','tools':[],'candidates':[{'organization_full_name':'Example Cats'}]}
+        app.directory=SimpleNamespace(find=find)
+        answer=app.dispatch('/api/chat',{'session_id':'live-model','message':'Could you point me towards somewhere to lend a paw around Toronto?'})
+        self.assertEqual(calls,['Toronto'])
+        self.assertEqual(len(provider.messages),1)
+        self.assertIn('directory_result',answer)
+        self.assertEqual(answer['agent_run']['model']['new_cloud_calls'],1)
+        self.assertEqual(answer['agent_run']['model']['status'],'used')
+
     def setUp(self):
         self.provider = FakeProvider()
         self.app = LocalApp(model=self.provider)

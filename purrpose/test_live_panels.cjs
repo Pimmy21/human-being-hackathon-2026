@@ -1,0 +1,16 @@
+const assert=require('node:assert/strict');
+const {buildMapModel}=require('./web/agent-map.js');
+const {buildReviewModel}=require('./web/review-panel.js');
+const agents=[];
+const run={duration_ms:14,kind:'real',agents,steps:[],tools:[{tool:'web',status:'ok',duration_ms:7},{tool:'hmem',operation:'save',status:'ok',duration_ms:3,memory_id:'mem-2'}]};
+let m=buildMapModel(run,{model:null});assert.match(m.tools.find(t=>t.tool==='web').text,/1 read/);assert.match(m.tools.find(t=>t.tool==='hmem').text,/mem-2/);assert.match(m.tools.find(t=>t.tool==='zetaris').text,/not used/);
+run.tools.push({tool:'zetaris',operation:'aws_identity',status:'completed',duration_ms:9});m=buildMapModel(run,{});assert.match(m.tools.find(t=>t.tool==='zetaris').text,/completed.*historical identity only/);
+run.tools[2].status='failed';m=buildMapModel(run,{});assert.match(m.tools.find(t=>t.tool==='zetaris').text,/failed/);
+let site={status:'read_complete',organization:'Unverified site',candidates:[{status:'read',url:'https://new.org/cat',title:'New case',excerpts:[{quote:'Cat needs care'}]}],organization_review:{fields:[{label:'Funding',status:'not_found_in_read_pages',observations:[],what_to_publish_or_clarify:'Provide dated totals'}],system_checks:['Current registry'],scope_note:'Only read pages',privacy:'No private uploads'}};
+m=buildReviewModel({site_review:site});assert.equal(m.status,'More information needed');assert.match(JSON.stringify(m),/Not stated/);assert.match(JSON.stringify(m),/https:\/\/new.org/);
+m=buildReviewModel({site_review:site,live_organization_review:site.organization_review});assert.ok(m.sections.some(s=>s.name==='Funding'));assert.match(JSON.stringify(m),/Not found within/);
+site.candidates=[];m=buildReviewModel({site_review:site});assert.equal(m.status,'Unable to assess');
+m=buildReviewModel({registry_result:{status:'historical_identity_matched',case_id:'REAL-TCR-REGISTRY',identity:{organization_full_name:'TORONTO CAT RESCUE',organization_number:'720884691RR0001'},source:'https://open.canada.ca/'}});assert.match(JSON.stringify(m),/2024/);assert.notEqual(m.status,'Information available');
+m=buildMapModel(null,{model:{route:'nvidia_direct',status:'used',new_cloud_calls:1,total_tokens:123,latency_ms:12}});assert.match(m.tools[0].text,/123 tokens.*12 ms/);
+m=buildMapModel(null,{model:{route:'meterless',status:'used',new_cloud_calls:1,total_tokens:123}});assert.match(m.tools.find(t=>t.tool==='nightshift').text,/1 call/);assert.match(m.tools[0].text,/not directly called/);
+console.log('Live workflow panels: source, historical registry, actual H-MEM/model metadata and unverified-state checks passed (offline fixtures).');

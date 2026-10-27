@@ -23,6 +23,13 @@ from .real_discovery import discover_real
 from .feedback import Feedback
 from .provider import from_settings, read_settings
 from .runs import RunStore
+from .registry import Registry, RemoteRegistry, settings as registry_settings
+from .site_discovery import bounded_discover, remember_discovery, SITES
+from .organization_live import organization_gaps
+from .url_discovery import bounded_inspect
+from .workflow_runs import record_discovery, record_registry, record_directory
+from .directory import AWSDirectory
+from .chat_intent import ONTARIO_CITIES
 
 PUBLIC_LINK = 'https://example.invalid/purrpose/maple'
 FUNDING_LINK = PUBLIC_LINK+'/funding'
@@ -30,7 +37,9 @@ WEB = Path(__file__).with_name('web')
 
 
 class LocalApp:
-    def __init__(self, memory=None, model=None):
+    def __init__(self, memory=None, model=None, registry=None):
+        self.registry = registry or Registry()
+        self.directory = AWSDirectory(self.registry)
         self.memory = memory
         self.model = model
         case = load_scenario('exhausted')
@@ -58,10 +67,11 @@ class LocalApp:
                 'source_review_date_scope': 'frozen_synthetic_fixture_only',
                 'default_ui_discovery': 'real_curated', 'runtime_roles': 'deterministic_code',
                 'memory': 'real_local_reference_configured' if self.memory else 'not_configured',
+                'zetaris': self.registry.readiness(),
                 'nightshift': self.model.status()['nightshift'] if self.model else 'not_connected',
                 'cloud_inference_in_this_server': bool(self.model and self.model.ready),
                 'model_provider': self.model.status() if self.model else None,
-                'public_web_fetching': 'two_fixed_articles_only', 'payments': False,
+                'public_web_fetching': 'fixed_lucy_plus_explicit_bounded_site_and_public_url_discovery', 'payments': False,
                 'public_fixture_link': PUBLIC_LINK,
                 'limitation': 'Restart resets simulated source contents; configured H-MEM history remains.'}
 
@@ -81,7 +91,8 @@ class LocalApp:
                                                     ended_at=max(stamps) if stamps else started, tools=[])
 
     def dispatch(self, path, data):
-        allowed = {'/api/supporter': {'city', 'region_wide', 'allow_expansion', 'collection'},
+        allowed = {'/api/find-organizations': {'city'}, '/api/discover-url': {'url'}, '/api/discover-site': {'site_id'}, '/api/registry': set(), '/api/registry/history': set(),
+                   '/api/supporter': {'city', 'region_wide', 'allow_expansion', 'collection'},
                    '/api/organization': {'public_links'}, '/api/update': {'action', 'request_id'},
                    '/api/history': {'cutoff'}, '/api/debug': set(),
                    '/api/chat': {'session_id', 'message'}, '/api/research': set(), '/api/research/read': set(),
@@ -91,6 +102,30 @@ class LocalApp:
             raise ValueError('Unknown operation')
         if not isinstance(data, dict) or set(data)-allowed[path]:
             raise ValueError('Unsupported request fields')
+        if path == '/api/discover-url':
+            if not isinstance(data.get('url'), str) or not 1 <= len(data['url']) <= 2048:
+                raise ValueError('Public HTTPS URL required, maximum 2048 characters')
+            started = time.time()
+            return record_discovery(self, bounded_inspect(data['url']), started)
+        if path == '/api/discover-site':
+            site_id = data.get('site_id')
+            if not isinstance(site_id, str) or site_id not in SITES:
+                raise ValueError('Choose an approved site')
+            started = time.time()
+            return record_discovery(self, bounded_discover(site_id), started)
+        if path == '/api/find-organizations':
+            city=data.get('city')
+            if city is not None and city not in ONTARIO_CITIES:
+                raise ValueError('Choose a supported Ontario city or Ontario-wide search')
+            started=time.time()
+            return record_directory(self,self.directory.find(city,self.memory),started)
+        if path == '/api/registry':
+            started = time.time()
+            return record_registry(self, self.registry.check(self.memory), started)
+        if path == '/api/registry/history':
+            if not self.memory:
+                return {'status': 'history_unavailable'}
+            return self.memory.call('recall', self.registry.case_id)
         if path == '/api/feedback':
             return self.feedback.submit(**data)
         if path == '/api/runs':
@@ -151,6 +186,7 @@ class LocalApp:
         if path == '/api/debug':
             return {'latest_run': self.latest_run, 'real_latest_run': self.real_latest_run, 'update_events': deepcopy(self.service.events),
                     'model_trace': deepcopy(getattr(self.model, 'trace', [])),
+                    'zetaris_trace': deepcopy(self.registry.trace),
                     'new_cloud_calls': 0, 'scope': 'Explicit local demo debug view; not production authorization.'}
         action, request_id = data.get('action'), data.get('request_id')
         if action not in ('clarify', 'more_funds', 'fully_funded', 'source_outage'):
@@ -209,6 +245,10 @@ def handler_for(app):
                      '/app-shell.css': ('app-shell.css', 'text/css; charset=utf-8'),
                      '/organizations.html': ('organization-demo.html', 'text/html; charset=utf-8'),
                      '/architecture.html': ('architecture.html', 'text/html; charset=utf-8'),
+                     '/registry.html': ('registry.html', 'text/html; charset=utf-8'),
+                     '/discover.html': ('discover.html', 'text/html; charset=utf-8'),
+                     '/discover.js': ('discover.js', 'text/javascript; charset=utf-8'),
+                     '/registry.js': ('registry.js', 'text/javascript; charset=utf-8'),
                      '/architecture.css': ('architecture.css', 'text/css; charset=utf-8'),
                      '/organization-demo.js': ('organization-demo.js', 'text/javascript; charset=utf-8'),
                      '/design-home.css': ('design-home.css', 'text/css; charset=utf-8'),
@@ -261,12 +301,18 @@ def main():
     p.add_argument('--state', type=Path)
     p.add_argument('--workspace', default='local-ui')
     p.add_argument('--env-file', type=Path, help='Local file with PURRPOSE_MODEL_* settings (never committed)')
+    p.add_argument('--zetaris-remote-env', type=Path)
+    p.add_argument('--zetaris-python', type=Path)
+    p.add_argument('--zetaris-jvm', type=Path)
     args = p.parse_args()
     if bool(args.reference) != bool(args.state):
         p.error('Supply both reference and state')
     memory = HMem(args.reference, args.state, workspace=args.workspace) if args.reference else None
     model = from_settings(read_settings(args.env_file, os.environ))
-    app = LocalApp(memory, model)
+    if any((args.zetaris_remote_env,args.zetaris_python,args.zetaris_jvm)) and not all((args.zetaris_remote_env,args.zetaris_python,args.zetaris_jvm)):
+        p.error('Remote JDBC requires env, Python and JVM paths together')
+    registry = RemoteRegistry(args.zetaris_remote_env,args.zetaris_python,args.zetaris_jvm) if args.zetaris_remote_env else Registry(registry_settings(args.env_file))
+    app = LocalApp(memory, model, registry)
     # Deliberately serial: the demo H-MEM file store has no concurrent-write guarantee.
     server = HTTPServer(('127.0.0.1', args.port), handler_for(app))
     print('Purrpose local demo: http://127.0.0.1:'+str(server.server_address[1]), flush=True)

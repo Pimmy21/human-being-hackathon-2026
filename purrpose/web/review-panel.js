@@ -66,8 +66,43 @@
       sections,privacy_note:review.privacy_note,guarantee:review.guarantee};
   }
 
+  function publicWebsite(result){
+    const read=result.site_review,review=result.live_organization_review||read.organization_review;
+    const pages=(read.candidates||[]).filter(p=>p.status==='read');
+    const sections=[];
+    sections.push(section('Source access and identity',pages.length?STATUS.needed:STATUS.unable,[
+      {text:result.source_summary||'The requested website read has finished.',detail:'Access results do not verify identity or trust. Technical details are in Agent map.'},
+      {text:'Organization identity, Ontario location and representation authority remain unverified.'},
+      ...pages.map(p=>({text:p.title||p.url,detail:'Unverified publisher content',source_url:p.url}))]));
+    if(result.live_organization_review&&review){
+      for(const f of review.fields)sections.push(section(f.label,f.status==='unable_to_assess'?STATUS.unable:STATUS.needed,[
+        {text:f.status==='not_found_in_read_pages'?'Not found within the pages read.':f.status==='unable_to_assess'?'No readable pages to assess.':'Related wording found; not established for a specific case.'},
+        ...f.observations.map(o=>({text:o.quote,source_url:o.url})),{text:f.what_to_publish_or_clarify}]));
+      sections.push(section('System checks still incomplete',STATUS.needed,review.system_checks.map(text=>({text}))));
+    }else{
+      sections.push(section('Source-linked observations',pages.length?STATUS.needed:STATUS.unable,
+        pages.flatMap(p=>(p.excerpts||[]).map(o=>({text:o.quote,detail:'Relevance only; not independently verified.',source_url:p.url})))));
+      sections.push(section('Funding',STATUS.needed,fundingItems({target:null,raised:null,remaining:null},false)));
+      if(review)sections.push(section('What still needs checking',STATUS.needed,review.fields.map(f=>({text:f.label,detail:f.what_to_publish_or_clarify}))));
+    }
+    return {kind:'public_website',title:read.organization||'Public website review',status:pages.length?STATUS.needed:STATUS.unable,
+      fictional:false,explanation:(result.retained_source_read?'Saved read from this conversation; not a fresh check. ':'Fresh explicitly requested website read. ')+
+        'Only the listed pages were assessed. Related words are not complete evidence. No qualified recommendation.',
+      sections,privacy_note:review&&review.privacy,guarantee:review&&review.scope_note};
+  }
+  function registryReview(result){
+    const r=result.registry_result,id=r.identity||r;
+    return {kind:'registry',title:'Historical registry lookup',status:r.status==='historical_identity_matched'?STATUS.needed:STATUS.unable,
+      fictional:false,explanation:r.note||'Historical identity only. No case qualification or current-registration verification.',
+      sections:[section('Organization queried',STATUS.needed,[{text:id.organization_full_name||r.case_id},
+        {text:id.organization_number||'No identity result established'},{text:'Reporting year: 2024',source_url:r.source}]),
+        section('Query outcome',r.status==='historical_identity_matched'?STATUS.needed:STATUS.unable,[
+          {text:r.status,detail:r.error_category||'Current registration, case need, funding and risk remain unverified.'}])]};
+  }
   function buildReviewModel(result) {
     if(!result||typeof result!=='object')return null;
+    if(result.site_review)return publicWebsite(result);
+    if(result.registry_result)return registryReview(result);
     if(result.organization_review)return organization(result.organization_review);
     if(result.research)return realCase(result,result.live_read);
     const groups=result.results&&['qualified','pending','no_current_gap'].map(k=>result.results[k]||[]);

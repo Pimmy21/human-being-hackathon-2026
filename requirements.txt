@@ -1,0 +1,5 @@
+# Runtime extras for JDBC and Windows timezone data.
+# Core HTTP and UI logic uses the Python standard library.
+JPype1==1.7.1
+JayDeBeApi==1.2.3
+tzdata>=2025.2

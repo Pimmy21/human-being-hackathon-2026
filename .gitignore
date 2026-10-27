@@ -25,3 +25,8 @@ tmp/
 # Generated local execution reports
 purrpose/artifacts/
 purrpose/research/live-read-result.json
+
+# Vendor binaries and large local recordings are operator-provided
+*.jar
+*.mp4
+*.mov

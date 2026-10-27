@@ -1,75 +1,120 @@
-# Human Being Hackathon Workspace
+# Purrpose
 
-Shared workspace for our Open Agent Hackathon 2026 ideas, mentor feedback and eventual project submission.
+**Before you give, see the evidence.**
 
-**For current development, read [START_HERE.md](START_HERE.md), then [HANDOFF.md](HANDOFF.md).** Purrpose is the current implementation direction. The sections below retain earlier proposal context; the handoff and full guidance describe current work. Application code now lives in [purrpose/](purrpose/README.md). Local H-MEM evidence is separate from the older synthetic wireframe.
+Purrpose helps donors explore animal-rescue appeals, understand the public evidence behind claims, and see what still needs verification. Rescue organizations use the same evidence system to learn what public information they could add. Organizations of all sizes should have a fair chance to be seen.
 
-## How Purrpose works
+A locally hosted Open Agent Hackathon 2026 prototype, initially for Ontario, Canada. No payments, fraud verdicts or guaranteed trust certification.
 
-Run `python -m purrpose.server`, open `/home.html` for the chat with its **Review** and **Agent map** tabs, and `/dashboard.html` for every run since the server started (details in [purrpose/FRONTEND_INTEGRATION.md](purrpose/FRONTEND_INTEGRATION.md)).
+## What works
 
-```mermaid
-flowchart LR
-  donor(["Donor asks in the chat"]) --> orch
-  update(["Rescue page changes, or 'refresh Lucy'"]) --> orch
-  orch["Orchestrator (coordinator)"] -->|"what does the user want?"| provider{"Model provider<br/>PURRPOSE_MODEL_PROVIDER"}
-  provider -->|meterless| runtime["Meterless Runtime via Nightshift<br/>built, not tested live"]
-  provider -->|nvidia_direct| direct["Direct NVIDIA API<br/>running"]
-  provider -->|"none, or the call failed"| fixed["Fixed phrases<br/>fallback, running"]
-  runtime --> nemo[("NVIDIA Nemotron")]
-  direct --> nemo
-  orch <-->|"recall and save"| hmem[("H-MEM memory")]
-  orch --> collector["Evidence Collector Agent"]
-  collector -.-> sources["Public pages, saved research,<br/>Zetaris (tested separately), fictional sources"]
-  collector --> evaluator["Evidence Evaluator Agent<br/>supported, conflict or not supported"]
-  evaluator -->|conflict| resolver["Dispute Resolver"]
-  resolver -->|"back to the evaluator"| evaluator
-  evaluator --> checks["Six checks, in code"]
-  checks --> gate{"All six pass?"}
-  gate -->|pass| qual["Qualified case, then the rescue's own donation link"]
-  gate -->|"not yet"| pend["Pending case, then a gap list for the rescue"]
+- Natural-language request handling, with optional live NVIDIA Nemotron intent classification and a code fallback.
+- Historical government directory queries through AWS-hosted Zetaris, returning organizations with full names, reported cities and sources.
+- Bounded reading of public organization websites and explicitly supplied appeals, including access checks and source-linked observations.
+- One shared evidence checklist: donors see available material and uncertainties; organizations see information to publish or clarify.
+- Actual observation save/recall through the official Meterless H-MEM reference engine.
+- Agent map and Runs views showing actual executed roles, tool outcomes, timing and model usage.
+
+The real Lucy appeal stays pending verification. Maple is explicitly fictional and demonstrates a capped review/repair loop. Neither silently replaces live website results.
+
+## Quick start
+
+Python 3.12+. Node.js 24+ for H-MEM. Hosted NVIDIA and local H-MEM do not require a dedicated GPU.
+
+```powershell
+git clone https://github.com/sjd1ka/human-being-hackathon-2026.git
+cd human-being-hackathon-2026
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m purrpose.server --port 8767
 ```
 
-The model only works out what the person wants. It never decides facts, amounts or qualification; code validates its answer and writes every reply. There is a path that doesn't go through Meterless Nightshift: the direct NVIDIA route runs today, and with no model configured, or if a call fails, the chat falls back to fixed phrases. The app never switches between providers on its own.
+Open [home](http://127.0.0.1:8767/home.html) or [chat](http://127.0.0.1:8767/app.html).
 
-| Agent                    | What it does                                                                                                                                           | Roles in FULL_GUIDANCE §16                 |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------- |
-| Orchestrator             | Decides which agent works next, what to skip and when to stop, within the budget                                                                       | coordinator                                 |
-| Evidence Collector Agent | Gathers relevant evidence from permitted public sources; the demo uses prepared sources                                                                | identity_risk, rescue_need, funding_channel |
-| Evidence Evaluator Agent | Checks source credibility, conflicting information and missing evidence, and says clearly what remains unverified instead of forcing a positive result | evaluator                                   |
-| Dispute Resolver         | Investigates one conflict the evaluator raised (for example, "pregnant" on 13 Oct versus "gave birth" on 14 Oct), then hands it back                   | dispute_resolver                            |
+**This minimal launch does not connect NVIDIA, H-MEM or Zetaris.** It supports UI exploration and labelled examples. Public URL reads require internet access. Follow [Setup](docs/SETUP.md) to reproduce the integrated demo.
 
-The agents are code roles inside one process (`purrpose/core.py`, `purrpose/real_review.py`); they are not separate models or model calls. After them, the six checks in plain code decide whether the whole case is qualified or pending. Lucy is a real case and stays pending, because her medical, funding and risk evidence is incomplete. Maple is fictional and exists only to show the full review.
+## Required connections for the integrated demo
 
-For the interactive version, with notes on every node and three example runs, download [docs/architecture/how-it-fits.html](docs/architecture/how-it-fits.html) and open it in a browser. The editable diagram is [how-it-fits.drawio](docs/architecture/how-it-fits.drawio); regenerate it from the page's data with `node docs/architecture/build-drawio.cjs`.
+| Component | Actual role | What you need |
+|---|---|---|
+| NVIDIA Nemotron direct API | Classifies the request; does not authenticate evidence | Your API key, model access and explicit request/token caps |
+| Zetaris Lightning | Fixed read-only SQL over the public CRA 2024 directory | An authorized running instance, JDBC credentials, vendor driver JAR, Java/JVM and the configured tables |
+| AWS | Hosts the team's Zetaris instance | Permission and network access to that instance; the app needs no AWS access keys and creates no AWS resources |
+| Meterless H-MEM | Saves and recalls scoped observations and open questions | Node 24+, official engine source, writable local state folder |
+| Public websites and government APIs | Source material | Internet access and permitted automated access |
+| Meterless Nightshift | Optional alternative model route, implemented but not live-verified here | A separately running compatible runtime and token; direct NVIDIA does not count as Nightshift use |
 
-## Purrpose first draft
+Credentials, credits, cloud instances, driver binaries and local memories are not included. Each operator supplies their own authorized configuration. [Setup](docs/SETUP.md) provides Windows commands and a clean configuration example.
 
-[Open the first draft review folder](<first%20draft/README.md>): interactive hard-coded wireframe, plain-English guide, full implementation specification and review instructions. The wireframe runs locally without API keys or external services. This is a review draft, not a finished product.
+## Workflow
 
-Earlier proposals remain available for reference:
+```mermaid
+flowchart TD
+  U[User request] --> I{Request interpretation}
+  I -->|Ordinary language, model configured| N[Nemotron intent classification]
+  N --> V[Validate structured intent]
+  I -->|Explicit URL or code-only action| C[Bounded coordinator]
+  V --> C
+  N -->|Failure or exhausted budget| F[Labelled code fallback]
+  F --> C
+  C -->|Find organizations| Z[Zetaris historical directory]
+  Z --> W[Bounded website investigation]
+  C -->|Inspect supplied link| W
+  C -->|Saved history| H[H-MEM recall]
+  W --> E[Source observations and scoped gaps]
+  E --> S[H-MEM save]
+  E --> A[Answer adapted to the question]
+  H --> A
+  A -->|Follow-up| C
+  C -->|Reuse retained observations| E
+  A -->|Explicit refresh or new link| W
+```
 
-- [Purrpose](ideas/purrpose.md): help donors examine animal rescue requests and their supporting evidence.
-- [Antenna Design Comparison](ideas/antenna-design-comparison.md): help RF engineers and students compare antenna designs from research papers.
+Roles execute as code in one process, not four or six obligatory LLM calls. The curated Lucy review additionally supports conditional chronology resolution; the fictional Maple review has a capped repair loop. Arbitrary website reads currently provide basic observations and gaps, not independent deep evidence evaluation or general dispute resolution. See [Architecture](docs/ARCHITECTURE.md).
 
-## What we need to decide
+## Try it
 
-1. Which user problem do we want to work on?
-2. Can we access enough suitable evidence or papers?
-3. What is the smallest convincing demo we can finish?
-4. What does our mentor think about the scope and track fit?
+1. Ask: `I would like to support a cat rescue around Toronto. Could you help me find options?`
+2. Select a returned organization by full name. Failed access does not imply wrongdoing.
+3. Supply a public appeal URL to investigate a specific case. Automatic current medical-appeal discovery for every organization is not established.
+4. Ask what evidence is missing or how much is still needed. Unknown funding remains unknown.
+5. Ask `show website history`. This recalls the current directory investigation or selected website's scoped records.
+6. Open **See how this was worked out** or **Runs** for actual tool use.
 
-## Where files belong
+[Demo guide](docs/DEMO.md) includes the real Lucy URLs, an organization example and recording steps. External content and availability can change.
 
-- `ideas/`: short proposals for discussion.
-- `docs/`: decisions, mentor feedback, setup instructions and integration responsibilities.
-- `purrpose/`: current application code, tests and reproducible local run instructions.
-- Final approved presentation, demo instructions and submission links will live here too. Large recordings and datasets should be linked rather than committed.
+## Limits and next steps
 
-This repository is the shared home for project files. Secrets stay in each teammate's local environment. Do not upload API keys, passwords, private donor information, or papers and images without permission to share them.
+- CRA 2024 data is historical, not current registration or risk clearance. Office city is not treatment location. Cat-name matching misses organizations without cat-related names.
+- Published claims and medical keywords are not authenticated clinical evidence. Costs, funds received, current need, recipient linkage and risk can remain unverified.
+- Public HTTPS text only: no login/CAPTCHA bypass, social-media scraping, private uploads, media analysis or payments. Source restrictions stop the read.
+- Short robots delays can be honored for one supplied page. No automatic retries or hidden provider substitution.
+- H-MEM persists locally. Chat sessions and the last 50 runs reset on restart. Model budgets are process-local too; do not restart to bypass an agreed allowance.
+- Nightshift is unconnected in the verified environment. The operator reported permission to skip it; retain that confirmation and check organizer requirements before claiming compliance.
+- Future: deeper evidence evaluation, automatic appeal discovery, broader conversational coverage and user testing. No model training is performed in this prototype.
 
-## Project status
+## Validation
 
-The `ideas/` documents describe proposals. The working local application is in `purrpose/`; [HANDOFF.md](HANDOFF.md) records what actually runs, what was tested and what is still missing, including that Nightshift is not yet connected.
+```powershell
+.\.venv\Scripts\python.exe -m unittest discover -s purrpose -t . -q
+node purrpose/test_api_client.cjs
+node purrpose/test_agent_map.cjs
+node purrpose/test_review_panel.cjs
+node purrpose/test_live_panels.cjs
+```
 
-See [Working together](docs/working-together.md) and [Tool responsibilities](docs/tool-responsibilities.md).
+H-MEM integration tests skip without the official reference configured. [Validation](docs/VALIDATION.md) distinguishes automated tests from live evidence.
+
+## Project files
+
+| Path | Contents |
+|---|---|
+| `purrpose/` | Application, tests, research notes and labelled fixtures |
+| `docs/SETUP.md` | Dependencies, account access, connection steps and launch commands |
+| `docs/ARCHITECTURE.md` | Roles, shared evidence and actual routing boundaries |
+| `docs/DEMO.md` | Recording walkthrough |
+| `docs/specification/` | Full product requirements and future acceptance scope, beyond this prototype |
+| `design/` | Logo/design assets; `design/home/` is a standalone design preview |
+| `scripts/start_demo.ps1` | Portable Windows launcher |
+
+Built by Shiyuan Tian, Benedictus Josh Christian, Farwa Yaqub and Pimmy (Pimlada Cbys).
